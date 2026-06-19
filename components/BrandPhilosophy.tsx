@@ -28,11 +28,10 @@ export default function BrandPhilosophy() {
           className="relative min-h-[50vh] lg:min-h-[80vh]"
         >
           <Image
-            src="/api/placeholder?w=800&h=1000&bg=75492B&fg=FFEBCD&text=Ciallade+Story"
+            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
             alt="Ciallade brand editorial — warm tones, structured silhouette"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            quality={85}
             className="object-cover"
           />
         </motion.div>

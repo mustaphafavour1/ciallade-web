@@ -33,11 +33,10 @@ export default function AboutPage() {
       <div ref={heroRef} className="relative min-h-[70vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/api/placeholder?w=1440&h=900&bg=1C1004&fg=CE8400&text=Ciallade+Story"
+            src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1440&h=900&q=80"
             alt="Ciallade brand heritage"
             fill
             sizes="100vw"
-            quality={85}
             priority
             className="object-cover opacity-50"
           />
@@ -94,11 +93,10 @@ export default function AboutPage() {
           className="relative min-h-[50vh] lg:min-h-[60vh]"
         >
           <Image
-            src="/api/placeholder?w=800&h=900&bg=75492B&fg=FFEBCD&text=Lagos+Studio"
+            src="https://images.unsplash.com/photo-1566206091558-7f218b696731?auto=format&fit=crop&w=800&h=900&q=80"
             alt="Ciallade Lagos studio and atelier"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            quality={85}
             className="object-cover"
           />
         </motion.div>

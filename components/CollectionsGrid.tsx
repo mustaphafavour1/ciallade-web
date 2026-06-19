@@ -6,39 +6,42 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { staggerContainer, scaleIn, reducedVariant } from '@/lib/animations';
 
+const UNS = (id: string, w: number, h: number) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+
 const categories = [
   {
     label: 'Ready-to-Wear',
     slug: 'tops',
-    image: '/api/placeholder?w=600&h=800&bg=CE8400&fg=1C1004&text=Ready+to+Wear',
+    image: UNS('photo-1529139574466-a303027c1d8b', 600, 800),
     span: 'row-span-2',
     aspect: 'aspect-[3/4]',
   },
   {
     label: 'Headwear',
     slug: 'headwear',
-    image: '/api/placeholder?w=600&h=400&bg=1C1004&fg=CE8400&text=Headwear',
+    image: UNS('photo-1576871337622-98d48d1cf531', 600, 400),
     span: '',
     aspect: 'aspect-[4/3]',
   },
   {
     label: 'Statement Pieces',
     slug: 'statement-pieces',
-    image: '/api/placeholder?w=600&h=400&bg=7C1C12&fg=FFEBCD&text=Statement+Pieces',
+    image: UNS('photo-1539109136881-3be0616acf4b', 600, 400),
     span: '',
     aspect: 'aspect-[4/3]',
   },
   {
     label: 'Bottoms',
     slug: 'bottoms',
-    image: '/api/placeholder?w=600&h=800&bg=75492B&fg=FFEBCD&text=Bottoms',
+    image: UNS('photo-1509631179647-0177331693ae', 600, 800),
     span: 'row-span-2',
     aspect: 'aspect-[3/4]',
   },
   {
     label: 'Jackets',
     slug: 'jackets',
-    image: '/api/placeholder?w=600&h=800&bg=CC7722&fg=1C1004&text=Jackets',
+    image: UNS('photo-1591047139829-d91aecb6caea', 600, 800),
     span: 'row-span-2',
     aspect: 'aspect-[3/4]',
   },

@@ -125,11 +125,10 @@ export default function EditorialSection() {
 
           <div className="relative" style={{ aspectRatio: '16/9' }}>
             <Image
-              src="/api/placeholder?w=1200&h=675&bg=1C1004&fg=CE8400&text=SS+2026+Campaign"
+              src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&h=675&q=80"
               alt="Ciallade SS 2026 editorial campaign"
               fill
               sizes="(max-width: 768px) 100vw, 80vw"
-              quality={85}
               className="object-cover"
             />
           </div>

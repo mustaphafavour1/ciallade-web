@@ -100,11 +100,10 @@ export default function Hero() {
           className="relative min-h-[50vh] lg:min-h-dvh"
         >
           <Image
-            src="/api/placeholder?w=900&h=1200&bg=75492B&fg=FFEBCD&text=Ciallade"
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&h=1200&q=80"
             alt="Ciallade 2026 Collection — editorial campaign image"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            quality={85}
             priority
             className="object-cover"
           />

@@ -1,3 +1,7 @@
+// Unsplash helper — swap to cloudinary() from lib/cloudinary.ts when ready
+const u = (id: string, w = 800, h = 1067) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+
 export type Product = {
   id: string;
   slug: string;
@@ -19,9 +23,8 @@ export const products: Product[] = [
     category: 'Tops',
     price: 55000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=CE8400&fg=1C1004&text=Ochre+Linen+Top'],
-    description:
-      'Structured linen top in warm ochre. Cut for confidence, finished with precision.',
+    images: [u('photo-1529139574466-a303027c1d8b')],
+    description: 'Structured linen top in warm ochre. Cut for confidence, finished with precision.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: true,
   },
@@ -32,9 +35,8 @@ export const products: Product[] = [
     category: 'Jackets',
     price: 145000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=1C1004&fg=CE8400&text=Dark+Wood+Jacket'],
-    description:
-      'Oversized silhouette in deep dark wood tones. The jacket that speaks before you do.',
+    images: [u('photo-1591047139829-d91aecb6caea')],
+    description: 'Oversized silhouette in deep dark wood tones. The jacket that speaks before you do.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     featured: true,
   },
@@ -45,9 +47,8 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 35000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=75492B&fg=FFEBCD&text=Caramel+Cap'],
-    description:
-      'Hand-woven cap in rich caramel tones. One size, every story.',
+    images: [u('photo-1588850561407-ed78c282e89b', 800, 800)],
+    description: 'Hand-woven cap in rich caramel tones. One size, every story.',
     sizes: ['One Size'],
     featured: true,
   },
@@ -58,9 +59,8 @@ export const products: Product[] = [
     category: 'Bottoms',
     price: 78000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=7C1C12&fg=FFEBCD&text=Wide-Leg+Trousers'],
-    description:
-      'Wide-leg cut in deep maroon. Effortless movement, deliberate presence.',
+    images: [u('photo-1509631179647-0177331693ae')],
+    description: 'Wide-leg cut in deep maroon. Effortless movement, deliberate presence.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
   },
@@ -71,9 +71,8 @@ export const products: Product[] = [
     category: 'Tops',
     price: 62000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=FFEBCD&fg=1C1004&text=Draped+Shirt'],
-    description:
-      'Fluid draped shirt in almond cream. Softness with structure.',
+    images: [u('photo-1515886657613-9f3515b0c78f')],
+    description: 'Fluid draped shirt in almond cream. Softness with structure.',
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
   },
@@ -84,9 +83,8 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 28000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=FE7017&fg=1C1004&text=Bucket+Hat'],
-    description:
-      'Bold bucket hat in autumn orange. Make your entrance from the crown down.',
+    images: [u('photo-1556306535-38febf6782dc', 800, 800)],
+    description: 'Bold bucket hat in autumn orange. Make your entrance from the crown down.',
     sizes: ['S/M', 'L/XL'],
     featured: false,
   },
@@ -97,9 +95,8 @@ export const products: Product[] = [
     category: 'Bottoms',
     price: 45000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=75492B&fg=FFEBCD&text=Linen+Shorts'],
-    description:
-      'Tailored linen shorts in warm coffee. Relaxed silhouette, refined finish.',
+    images: [u('photo-1485230895905-ec40ba36b9bc')],
+    description: 'Tailored linen shorts in warm coffee. Relaxed silhouette, refined finish.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
   },
@@ -110,7 +107,7 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 32000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=CE8400&fg=1C1004&text=BYRA+Cap'],
+    images: [u('photo-1576871337622-98d48d1cf531', 800, 800)],
     description:
       'Signature BYRA cap embroidered with the geometric line motif. A crown for the self-defined.',
     sizes: ['One Size'],
@@ -123,9 +120,8 @@ export const products: Product[] = [
     category: 'Statement Pieces',
     price: 180000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=CC7722&fg=1C1004&text=Statement+Coat'],
-    description:
-      'The centerpiece. An ochre statement coat cut to command every room.',
+    images: [u('photo-1539109136881-3be0616acf4b')],
+    description: 'The centerpiece. An ochre statement coat cut to command every room.',
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
   },
@@ -136,9 +132,8 @@ export const products: Product[] = [
     category: 'Tops',
     price: 38000,
     currency: 'NGN',
-    images: ['/api/placeholder?w=600&h=800&bg=1C1004&fg=CE8400&text=Boxy+Tee'],
-    description:
-      'Heavyweight jersey tee in a boxy silhouette. The foundation of every look.',
+    images: [u('photo-1503342394128-c104d54dba01')],
+    description: 'Heavyweight jersey tee in a boxy silhouette. The foundation of every look.',
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     featured: false,
   },
