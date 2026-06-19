@@ -4,8 +4,7 @@
 
 @font-face {
   font-family: 'Argue';
-  src: url('/fonts/argue.woff2') format('woff2'),
-       url('/fonts/argue.ttf') format('truetype');
+  src: url('/fonts/argue.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

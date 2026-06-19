@@ -125,7 +125,7 @@ export default function EditorialSection() {
 
           <div className="relative" style={{ aspectRatio: '16/9' }}>
             <Image
-              src="https://placehold.co/1200x675/1C1004/CE8400?text=SS+2026+Campaign"
+              src="/api/placeholder?w=1200&h=675&bg=1C1004&fg=CE8400&text=SS+2026+Campaign"
               alt="Ciallade SS 2026 editorial campaign"
               fill
               sizes="(max-width: 768px) 100vw, 80vw"

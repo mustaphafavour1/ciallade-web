@@ -100,7 +100,7 @@ export default function Hero() {
           className="relative min-h-[50vh] lg:min-h-dvh"
         >
           <Image
-            src="https://placehold.co/900x1200/75492B/FFEBCD?text=Ciallade"
+            src="/api/placeholder?w=900&h=1200&bg=75492B&fg=FFEBCD&text=Ciallade"
             alt="Ciallade 2026 Collection — editorial campaign image"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"

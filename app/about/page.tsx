@@ -33,7 +33,7 @@ export default function AboutPage() {
       <div ref={heroRef} className="relative min-h-[70vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://placehold.co/1440x900/1C1004/CE8400?text=Ciallade+Story"
+            src="/api/placeholder?w=1440&h=900&bg=1C1004&fg=CE8400&text=Ciallade+Story"
             alt="Ciallade brand heritage"
             fill
             sizes="100vw"
@@ -94,7 +94,7 @@ export default function AboutPage() {
           className="relative min-h-[50vh] lg:min-h-[60vh]"
         >
           <Image
-            src="https://placehold.co/800x900/75492B/FFEBCD?text=Lagos+Studio"
+            src="/api/placeholder?w=800&h=900&bg=75492B&fg=FFEBCD&text=Lagos+Studio"
             alt="Ciallade Lagos studio and atelier"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"

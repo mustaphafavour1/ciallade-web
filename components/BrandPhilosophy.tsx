@@ -28,7 +28,7 @@ export default function BrandPhilosophy() {
           className="relative min-h-[50vh] lg:min-h-[80vh]"
         >
           <Image
-            src="https://placehold.co/800x1000/75492B/FFEBCD?text=Ciallade+Story"
+            src="/api/placeholder?w=800&h=1000&bg=75492B&fg=FFEBCD&text=Ciallade+Story"
             alt="Ciallade brand editorial — warm tones, structured silhouette"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"

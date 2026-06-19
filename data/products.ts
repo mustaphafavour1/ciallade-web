@@ -19,7 +19,7 @@ export const products: Product[] = [
     category: 'Tops',
     price: 55000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/CE8400/1C1004?text=Ochre+Linen+Top'],
+    images: ['/api/placeholder?w=600&h=800&bg=CE8400&fg=1C1004&text=Ochre+Linen+Top'],
     description:
       'Structured linen top in warm ochre. Cut for confidence, finished with precision.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
@@ -32,7 +32,7 @@ export const products: Product[] = [
     category: 'Jackets',
     price: 145000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/1C1004/CE8400?text=Dark+Wood+Jacket'],
+    images: ['/api/placeholder?w=600&h=800&bg=1C1004&fg=CE8400&text=Dark+Wood+Jacket'],
     description:
       'Oversized silhouette in deep dark wood tones. The jacket that speaks before you do.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
@@ -45,7 +45,7 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 35000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/75492B/FFEBCD?text=Caramel+Cap'],
+    images: ['/api/placeholder?w=600&h=800&bg=75492B&fg=FFEBCD&text=Caramel+Cap'],
     description:
       'Hand-woven cap in rich caramel tones. One size, every story.',
     sizes: ['One Size'],
@@ -58,7 +58,7 @@ export const products: Product[] = [
     category: 'Bottoms',
     price: 78000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/7C1C12/FFEBCD?text=Wide-Leg+Trousers'],
+    images: ['/api/placeholder?w=600&h=800&bg=7C1C12&fg=FFEBCD&text=Wide-Leg+Trousers'],
     description:
       'Wide-leg cut in deep maroon. Effortless movement, deliberate presence.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
@@ -71,7 +71,7 @@ export const products: Product[] = [
     category: 'Tops',
     price: 62000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/FFEBCD/1C1004?text=Draped+Shirt'],
+    images: ['/api/placeholder?w=600&h=800&bg=FFEBCD&fg=1C1004&text=Draped+Shirt'],
     description:
       'Fluid draped shirt in almond cream. Softness with structure.',
     sizes: ['S', 'M', 'L', 'XL'],
@@ -84,7 +84,7 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 28000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/FE7017/1C1004?text=Bucket+Hat'],
+    images: ['/api/placeholder?w=600&h=800&bg=FE7017&fg=1C1004&text=Bucket+Hat'],
     description:
       'Bold bucket hat in autumn orange. Make your entrance from the crown down.',
     sizes: ['S/M', 'L/XL'],
@@ -97,7 +97,7 @@ export const products: Product[] = [
     category: 'Bottoms',
     price: 45000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/75492B/FFEBCD?text=Linen+Shorts'],
+    images: ['/api/placeholder?w=600&h=800&bg=75492B&fg=FFEBCD&text=Linen+Shorts'],
     description:
       'Tailored linen shorts in warm coffee. Relaxed silhouette, refined finish.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
@@ -110,7 +110,7 @@ export const products: Product[] = [
     category: 'Headwear',
     price: 32000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/CE8400/1C1004?text=BYRA+Cap'],
+    images: ['/api/placeholder?w=600&h=800&bg=CE8400&fg=1C1004&text=BYRA+Cap'],
     description:
       'Signature BYRA cap embroidered with the geometric line motif. A crown for the self-defined.',
     sizes: ['One Size'],
@@ -123,7 +123,7 @@ export const products: Product[] = [
     category: 'Statement Pieces',
     price: 180000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/CC7722/1C1004?text=Statement+Coat'],
+    images: ['/api/placeholder?w=600&h=800&bg=CC7722&fg=1C1004&text=Statement+Coat'],
     description:
       'The centerpiece. An ochre statement coat cut to command every room.',
     sizes: ['S', 'M', 'L', 'XL'],
@@ -136,7 +136,7 @@ export const products: Product[] = [
     category: 'Tops',
     price: 38000,
     currency: 'NGN',
-    images: ['https://placehold.co/600x800/1C1004/CE8400?text=Boxy+Tee'],
+    images: ['/api/placeholder?w=600&h=800&bg=1C1004&fg=CE8400&text=Boxy+Tee'],
     description:
       'Heavyweight jersey tee in a boxy silhouette. The foundation of every look.',
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
