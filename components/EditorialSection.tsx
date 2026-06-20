@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import Image from 'next/image';
 
 const COLS = 8;
 const ROWS = 8;
@@ -161,10 +162,12 @@ export default function EditorialSection() {
             style={{ aspectRatio: '1/1' }}
           >
             {/* Background image (always mounted) */}
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&h=800&q=80"
               alt="Ciallade SS 2026 editorial campaign"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(min-width: 600px) 600px, 100vw"
             />
 
             {/* Pixel overlay: 8×8 grid of dark squares that hide, then reveal */}
