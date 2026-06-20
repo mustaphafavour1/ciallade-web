@@ -32,86 +32,89 @@ export default function BrandPhilosophy() {
   );
 
   return (
-    // Outer scroll container — tall so there's room to scroll through the text
-    <div ref={outerRef} className="relative" style={{ minHeight: '250vh' }}>
-      {/* Sticky inner: left image + right text, stays in viewport while scrolling */}
-      <div className="sticky top-0 h-screen overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+    <>
+      {/* Section title + subtitle above sticky container */}
+      <div className="bg-dark-wood px-8 md:px-14 lg:px-16 pt-40 pb-16">
+        <p className="label-text text-xs text-nature-brown tracking-widest mb-4">Our Foundation</p>
+        <h2 className="font-display text-almond-cream leading-tight" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
+          The philosophy<br />behind every stitch.
+        </h2>
+      </div>
 
-          {/* Left half: editorial image, fills full height */}
-          <div className="relative min-h-[45vh] lg:min-h-0">
-            <Image
-              src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
-              alt="Ciallade brand editorial — warm tones, structured silhouette"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              priority
-            />
-            {/* Right edge fade to blend into the right panel */}
-            <div
-              className="absolute inset-y-0 right-0 w-16 hidden lg:block"
-              style={{
-                background: 'linear-gradient(to right, transparent, #1C1004)',
-              }}
-            />
-          </div>
+      {/* Outer scroll container — tall so there's room to scroll through the text */}
+      <div ref={outerRef} className="relative" style={{ minHeight: '250vh' }}>
+        {/* Sticky inner: left image + right text, stays in viewport while scrolling */}
+        <div className="sticky top-0 h-screen overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
 
-          {/* Right half: dark background, scroll-fill text */}
-          <div
-            className="flex flex-col justify-center h-full px-8 md:px-12 py-20 overflow-y-auto lg:overflow-hidden"
-            style={{ background: '#1C1004' }}
-          >
-            <p className="label-text text-xs text-nature-brown tracking-widest mb-6">
-              Brand Philosophy
-            </p>
-
-            <h2
-              className="font-display text-almond-cream leading-tight mb-10"
-              style={{ fontSize: 'clamp(28px, 3.5vw, 44px)' }}
-            >
-              Wear who you are.
-            </h2>
-
-            {/* Scroll-driven outline-fill text effect */}
-            <div className="relative mb-10">
-              {/* Outline layer — always visible */}
-              <p
-                className="font-body font-light leading-relaxed whitespace-pre-line"
-                style={{
-                  fontSize: 'clamp(16px, 1.8vw, 22px)',
-                  WebkitTextStroke: '0.5px #CE8400',
-                  color: 'transparent',
-                  userSelect: 'none',
-                }}
-              >
-                {PHILOSOPHY_TEXT}
-              </p>
-
-              {/* Filled layer — clips from top to bottom as you scroll */}
-              <motion.p
-                className="font-body font-light leading-relaxed whitespace-pre-line absolute top-0 left-0 w-full"
-                style={{
-                  fontSize: 'clamp(16px, 1.8vw, 22px)',
-                  color: '#CE8400',
-                  clipPath,
-                  pointerEvents: 'none',
-                }}
-              >
-                {PHILOSOPHY_TEXT}
-              </motion.p>
+            {/* Left half: editorial image, fills full height */}
+            <div className="relative min-h-[45vh] lg:min-h-0" style={{ borderRight: '3px solid #CE8400' }}>
+              <Image
+                src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
+                alt="Ciallade brand editorial — warm tones, structured silhouette"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
             </div>
 
-            <a
-              href="/about"
-              className="inline-block label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
+            {/* Right half: dark background, scroll-fill text */}
+            <div
+              className="flex flex-col justify-center h-full px-8 md:px-12 py-20 overflow-y-auto lg:overflow-hidden"
+              style={{ background: '#1C1004' }}
             >
-              Our Story →
-            </a>
-          </div>
+              <p className="label-text text-xs text-nature-brown tracking-widest mb-6">
+                Brand Philosophy
+              </p>
 
+              <h2
+                className="font-display text-almond-cream leading-tight mb-10"
+                style={{ fontSize: 'clamp(28px, 3.5vw, 44px)' }}
+              >
+                Wear who you are.
+              </h2>
+
+              {/* Scroll-driven outline-fill text effect */}
+              <div className="relative mb-10">
+                {/* Outline layer — always visible */}
+                <p
+                  className="font-body font-light leading-[1.6] whitespace-pre-line"
+                  style={{
+                    fontSize: 'clamp(28px, 3vw, 40px)',
+                    WebkitTextStroke: '0.5px #CE8400',
+                    color: 'transparent',
+                    userSelect: 'none',
+                  }}
+                >
+                  {PHILOSOPHY_TEXT}
+                </p>
+
+                {/* Filled layer — clips from top to bottom as you scroll */}
+                <motion.p
+                  className="font-body font-light leading-[1.6] whitespace-pre-line absolute top-0 left-0 w-full"
+                  style={{
+                    fontSize: 'clamp(28px, 3vw, 40px)',
+                    color: '#CE8400',
+                    clipPath,
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {PHILOSOPHY_TEXT}
+                </motion.p>
+              </div>
+
+              <a
+                href="/about"
+                className="inline-block label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
+              >
+                Our Story →
+              </a>
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

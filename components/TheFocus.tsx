@@ -35,7 +35,7 @@ export default function TheFocus() {
 
       <div className="relative z-10">
         {/* Top label */}
-        <div className="px-6 md:px-12 pt-24 pb-12">
+        <div className="px-6 md:px-12 pt-48 pb-16">
           <motion.p
             variants={item}
             initial="hidden"
@@ -60,24 +60,24 @@ export default function TheFocus() {
           variants={container}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 mb-24"
+          className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 mb-32"
         >
           {AUDIENCE.map((a, i) => (
             <motion.div
               key={a.label}
               variants={item}
               transition={{ delay: i * 0.1 }}
-              className="border border-dark-wood/10 p-8 hover:border-coffee-brown/40 transition-colors duration-400"
+              style={{ borderTop: '1px dashed rgba(28,16,4,0.25)', paddingTop: '2rem' }}
             >
               <div className="w-6 h-px bg-nature-brown mb-5" />
-              <h3 className="font-display text-dark-wood text-2xl mb-3 leading-tight">{a.label}</h3>
-              <p className="font-body font-light text-dark-wood/60 text-sm leading-relaxed">{a.body}</p>
+              <h3 className="font-display text-dark-wood text-3xl font-bold mb-3 leading-tight">{a.label}</h3>
+              <p className="font-body font-light text-dark-wood/60 text-base leading-relaxed">{a.body}</p>
             </motion.div>
           ))}
         </motion.div>
 
         {/* 10-Year Vision — full bleed dark block */}
-        <div className="relative bg-dark-wood py-24 px-6 md:px-12 overflow-hidden">
+        <div className="relative bg-dark-wood py-40 px-6 md:px-12 overflow-hidden">
           <BYRAPattern animated={false} />
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -90,7 +90,7 @@ export default function TheFocus() {
               <p className="label-text text-xs text-nature-brown mb-6">10-Year Vision · 2035</p>
               <blockquote
                 className="font-display text-almond-cream leading-[0.9]"
-                style={{ fontSize: 'clamp(32px, 4.5vw, 64px)' }}
+                style={{ fontSize: 'clamp(42px, 5.5vw, 80px)' }}
               >
                 The definitive
                 <br />
@@ -106,12 +106,12 @@ export default function TheFocus() {
               transition={{ delay: 0.45 }}
               className="space-y-6"
             >
-              <p className="font-body font-light text-almond-cream/65 text-base leading-relaxed">
+              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">
                 By 2035, Ciallade will be recognized globally as the definitive African luxury fashion
                 house — not a brand that competes with European houses, but one that has built its own
                 category entirely.
               </p>
-              <p className="font-body font-light text-almond-cream/65 text-base leading-relaxed">
+              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">
                 Rooted in Nigeria. Worn across continents. Belonging to no trend, no season, no movement
                 but its own.
               </p>
@@ -127,8 +127,8 @@ export default function TheFocus() {
                   { stat: '50+', label: 'Countries Reached' },
                 ].map((s) => (
                   <motion.div key={s.label} variants={item}>
-                    <p className="font-display text-nature-brown text-4xl leading-none mb-1">{s.stat}</p>
-                    <p className="label-text text-[10px] text-almond-cream/40">{s.label}</p>
+                    <p className="font-display text-nature-brown text-6xl leading-none mb-1">{s.stat}</p>
+                    <p className="label-text text-[10px] text-almond-cream/60">{s.label}</p>
                   </motion.div>
                 ))}
               </motion.div>

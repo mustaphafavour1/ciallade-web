@@ -2,11 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { featuredProducts, formatPrice } from '@/data/products';
 
 const CYCLE_MS = 4500;
+
+// -90 so that angle 0° starts at the top of the circle
+function wedgePath(
+  cx: number,
+  cy: number,
+  r: number,
+  startDeg: number,
+  endDeg: number
+): string {
+  const s = ((startDeg - 90) * Math.PI) / 180;
+  const e = ((endDeg - 90) * Math.PI) / 180;
+  const x1 = cx + r * Math.cos(s);
+  const y1 = cy + r * Math.sin(s);
+  const x2 = cx + r * Math.cos(e);
+  const y2 = cy + r * Math.sin(e);
+  const large = endDeg - startDeg > 180 ? 1 : 0;
+  return `M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z`;
+}
 
 export default function FeaturedStrip() {
   const [activeIdx, setActiveIdx] = useState(0);
@@ -23,18 +40,12 @@ export default function FeaturedStrip() {
 
   return (
     <section
-      className="relative overflow-hidden"
-      style={{
-        minHeight: '90vh',
-        background: `
-          radial-gradient(ellipse at 30% 80%, rgba(117,73,43,0.12) 0%, transparent 50%),
-          linear-gradient(160deg, #0c0700 0%, #1C1004 45%, #0a0602 100%)
-        `,
-      }}
+      className="relative overflow-hidden bg-dark-wood"
+      style={{ minHeight: '90vh' }}
     >
       {/* ── Mobile layout: stack vertically ── */}
       <div className="flex flex-col md:hidden min-h-[90vh]">
-        {/* Details top */}
+        {/* Details */}
         <div className="px-6 pt-16 pb-8 flex-none">
           <p className="label-text text-[10px] text-nature-brown tracking-widest mb-3">
             Featured Pieces
@@ -67,55 +78,81 @@ export default function FeaturedStrip() {
           </AnimatePresence>
         </div>
 
-        {/* Large circular image */}
-        <div className="relative flex-1 min-h-[55vw] overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`img-${activeIdx}`}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Image
-                src={active.images[0]}
-                alt={active.name}
-                fill
-                className="object-cover object-center"
-                sizes="100vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </motion.div>
-          </AnimatePresence>
+        {/* Full-width pie chart on mobile */}
+        <div className="flex justify-center py-6 flex-none">
+          <svg
+            viewBox="0 0 600 600"
+            style={{ width: '80vw', height: '80vw', maxWidth: '360px', maxHeight: '360px' }}
+            aria-hidden="true"
+          >
+            <defs>
+              {featuredProducts.map((_, i) => (
+                <clipPath key={i} id={`mobile-clip-${i}`}>
+                  <path d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)} />
+                </clipPath>
+              ))}
+            </defs>
+            {featuredProducts.map((product, i) => {
+              const isActive = i === activeIdx;
+              return (
+                <g key={product.id} onClick={() => setActiveIdx(i)} style={{ cursor: 'pointer' }}>
+                  <image
+                    href={product.images[0]}
+                    x="10"
+                    y="10"
+                    width="580"
+                    height="580"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#mobile-clip-${i})`}
+                    style={{ opacity: isActive ? 1 : 0.45, transition: 'opacity 0.4s' }}
+                  />
+                  <path
+                    d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)}
+                    fill="none"
+                    stroke="#0a0600"
+                    strokeWidth="3"
+                  />
+                  {isActive && (
+                    <path
+                      d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)}
+                      fill="none"
+                      stroke="#CE8400"
+                      strokeWidth="2"
+                    />
+                  )}
+                </g>
+              );
+            })}
+          </svg>
         </div>
 
-        {/* Selector dots */}
-        <div className="flex gap-3 justify-center py-5 flex-none">
-          {featuredProducts.map((_, i) => (
+        {/* Mobile thumbnail row */}
+        <div className="flex gap-3 justify-center py-4 flex-none">
+          {featuredProducts.map((p, i) => (
             <button
-              key={i}
+              key={p.id}
               onClick={() => setActiveIdx(i)}
-              aria-label={`Select product ${i + 1}`}
-              className="relative w-10 h-10 rounded-full overflow-hidden flex-none"
+              aria-label={`View ${p.name}`}
+              className="relative rounded-full overflow-hidden flex-none transition-all duration-300"
               style={{
-                outline: i === activeIdx ? '2px solid #CE8400' : '2px solid transparent',
+                width: i === activeIdx ? 44 : 34,
+                height: i === activeIdx ? 44 : 34,
+                outline: i === activeIdx ? '2px solid #CE8400' : '2px solid rgba(206,132,0,0.25)',
                 outlineOffset: '2px',
               }}
             >
-              <Image
-                src={featuredProducts[i].images[0]}
-                alt={featuredProducts[i].name}
-                fill
-                className="object-cover"
-                sizes="40px"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={p.images[0]}
+                alt={p.name}
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── Desktop layout: left/right split ── */}
+      {/* ── Desktop layout: left / right split ── */}
       <div className="hidden md:flex min-h-[90vh] relative">
         {/* Left panel — ~45% width */}
         <div
@@ -125,8 +162,10 @@ export default function FeaturedStrip() {
           <p className="label-text text-[10px] text-nature-brown tracking-widest mb-3">
             Featured Pieces
           </p>
-          <h2 className="font-display text-almond-cream leading-tight mb-10"
-            style={{ fontSize: 'clamp(40px, 4.5vw, 72px)' }}>
+          <h2
+            className="font-display text-almond-cream leading-tight mb-10"
+            style={{ fontSize: 'clamp(40px, 4.5vw, 72px)' }}
+          >
             The Edit
           </h2>
 
@@ -138,8 +177,10 @@ export default function FeaturedStrip() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="font-display text-almond-cream leading-tight mb-2"
-                style={{ fontSize: 'clamp(22px, 2.2vw, 36px)' }}>
+              <p
+                className="font-display text-almond-cream leading-tight mb-2"
+                style={{ fontSize: 'clamp(22px, 2.2vw, 36px)' }}
+              >
                 {active.name}
               </p>
               <p className="label-text text-sm text-nature-brown mb-5">
@@ -157,78 +198,106 @@ export default function FeaturedStrip() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Small selector — circular thumbnails stacked */}
-          <div className="absolute bottom-12 left-12 lg:left-16 flex gap-3 items-center">
-            {featuredProducts.map((p, i) => (
-              <button
-                key={p.id}
-                onClick={() => setActiveIdx(i)}
-                aria-label={`View ${p.name}`}
-                className="relative rounded-full overflow-hidden flex-none transition-all duration-300"
-                style={{
-                  width: i === activeIdx ? 52 : 40,
-                  height: i === activeIdx ? 52 : 40,
-                  outline: i === activeIdx ? '2px solid #CE8400' : '2px solid rgba(206,132,0,0.25)',
-                  outlineOffset: '2px',
-                }}
-              >
-                <Image
-                  src={p.images[0]}
-                  alt={p.name}
-                  fill
-                  className="object-cover"
-                  sizes="52px"
-                />
-              </button>
-            ))}
+          {/* Small selector pie */}
+          <div className="mt-10">
+            <svg
+              viewBox="0 0 200 200"
+              style={{ width: '160px', height: '160px', cursor: 'pointer' }}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                let angle = (Math.atan2(y, x) * 180) / Math.PI + 90;
+                if (angle < 0) angle += 360;
+                const idx = Math.floor(angle / 60) % 6;
+                setActiveIdx(idx);
+              }}
+              aria-label="Select a featured product"
+              role="img"
+            >
+              <defs>
+                {featuredProducts.map((_, i) => (
+                  <clipPath key={i} id={`small-clip-${i}`}>
+                    <path d={wedgePath(100, 100, 85, i * 60, (i + 1) * 60)} />
+                  </clipPath>
+                ))}
+              </defs>
+              {featuredProducts.map((product, i) => (
+                <g key={product.id}>
+                  <image
+                    href={product.images[0]}
+                    x="15"
+                    y="15"
+                    width="170"
+                    height="170"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#small-clip-${i})`}
+                    style={{ opacity: i === activeIdx ? 1 : 0.55 }}
+                  />
+                  <path
+                    d={wedgePath(100, 100, 85, i * 60, (i + 1) * 60)}
+                    fill="none"
+                    stroke={i === activeIdx ? '#CE8400' : '#0a0600'}
+                    strokeWidth={i === activeIdx ? 2.5 : 2}
+                  />
+                </g>
+              ))}
+            </svg>
+            <p className="label-text text-[9px] text-almond-cream/30 mt-2">Click to explore</p>
           </div>
         </div>
 
-        {/* Right panel — large circular image clipped at right edge */}
+        {/* Right panel — large pie chart, left half visible */}
         <div
-          className="absolute right-0 top-0 bottom-0 flex items-center"
-          style={{ width: '62%', pointerEvents: 'none' }}
+          className="absolute top-0 bottom-0 right-0 flex items-center"
+          style={{ width: '60%', overflow: 'hidden' }}
         >
-          {/* Circle container: circle diameter = 80vh, offset right so half is off-screen */}
-          <div
-            className="relative flex-none"
-            style={{
-              width: '80vh',
-              height: '80vh',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              marginLeft: 'auto',
-              transform: 'translateX(40vh)',
-            }}
+          <svg
+            viewBox="0 0 600 600"
+            style={{ height: '88vh', width: 'auto', flexShrink: 0, marginLeft: '-12%' }}
+            aria-hidden="true"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`circle-${activeIdx}`}
-                className="absolute inset-0"
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Image
-                  src={active.images[0]}
-                  alt={active.name}
-                  fill
-                  className="object-cover object-center"
-                  sizes="80vh"
-                  priority
-                />
-                {/* Subtle left-edge gradient so image fades into dark bg */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      'linear-gradient(to right, rgba(12,7,0,0.55) 0%, transparent 28%)',
-                  }}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
+            <defs>
+              {featuredProducts.map((_, i) => (
+                <clipPath key={i} id={`large-clip-${i}`}>
+                  <path d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)} />
+                </clipPath>
+              ))}
+            </defs>
+            {featuredProducts.map((product, i) => {
+              const isActive = i === activeIdx;
+              return (
+                <g key={product.id}>
+                  <image
+                    href={product.images[0]}
+                    x="10"
+                    y="10"
+                    width="580"
+                    height="580"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#large-clip-${i})`}
+                    style={{ opacity: isActive ? 1 : 0.5, transition: 'opacity 0.4s' }}
+                  />
+                  {/* Thin dark separator on each wedge edge */}
+                  <path
+                    d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)}
+                    fill="none"
+                    stroke="#0a0600"
+                    strokeWidth="3"
+                  />
+                  {/* Gold highlight on active wedge */}
+                  {isActive && (
+                    <path
+                      d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)}
+                      fill="none"
+                      stroke="#CE8400"
+                      strokeWidth="2"
+                    />
+                  )}
+                </g>
+              );
+            })}
+          </svg>
         </div>
       </div>
     </section>

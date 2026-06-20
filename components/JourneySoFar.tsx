@@ -1,8 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { fadeUp, reducedVariant } from '@/lib/animations';
+import { useRef, useState } from 'react';
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 
 const MILESTONES = [
   {
@@ -38,86 +37,90 @@ const MILESTONES = [
 ];
 
 export default function JourneySoFar() {
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-  const shouldReduce = useReducedMotion();
-  const item = shouldReduce ? reducedVariant : fadeUp;
+  const outerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: outerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  const [frame, setFrame] = useState(0);
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    // 3 frames over scroll 0→1, last frame at 0.67→1
+    setFrame(Math.min(2, Math.floor(v * 3)));
+  });
+
+  // The two milestones for this frame
+  const m0 = MILESTONES[frame * 2];
+  const m1 = MILESTONES[frame * 2 + 1];
 
   return (
-    <section ref={ref} className="relative bg-almond-cream py-24 overflow-hidden">
-      {/* Subtle diagonal stripe background */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(45deg, #1C1004 0px, #1C1004 1px, transparent 1px, transparent 40px)',
-        }}
-      />
+    <div ref={outerRef} className="relative" style={{ minHeight: '400vh' }}>
+      <div className="sticky top-0 h-screen overflow-hidden bg-almond-cream">
+        {/* Header */}
+        <div className="px-8 md:px-16 pt-24 pb-0">
+          <p className="label-text text-xs text-coffee-brown mb-3">Since 2020</p>
+          <h2
+            className="font-display text-dark-wood leading-tight"
+            style={{ fontSize: 'clamp(36px, 5vw, 64px)' }}
+          >
+            The Journey So Far
+          </h2>
+        </div>
 
-      <div className="relative z-10 px-6 md:px-12">
-        <motion.p
-          variants={item}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="label-text text-xs text-coffee-brown mb-4"
-        >
-          Since 2020
-        </motion.p>
-        <motion.h2
-          variants={item}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          transition={{ delay: 0.08 }}
-          className="font-display text-dark-wood text-4xl md:text-5xl mb-20 leading-tight"
-        >
-          The Journey So Far
-        </motion.h2>
-
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical line */}
+        {/* Two milestones */}
+        <AnimatePresence mode="wait">
           <motion.div
-            className="absolute left-[calc(theme(spacing.16)+1px)] top-0 w-px bg-coffee-brown/20 hidden md:block"
-            initial={{ scaleY: 0, originY: 0 }}
-            animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
-            transition={{ delay: 0.3, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-            style={{ height: '100%' }}
-          />
-
-          <div className="space-y-12 md:space-y-10">
-            {MILESTONES.map((m, i) => (
-              <motion.div
-                key={m.year}
-                variants={item}
-                initial="hidden"
-                animate={inView ? 'visible' : 'hidden'}
-                transition={{ delay: 0.2 + i * 0.1 }}
-                className="flex gap-8 md:gap-12 items-start"
-              >
-                {/* Year */}
-                <div className="flex-none w-16 text-right">
-                  <span className="font-display text-coffee-brown text-xl leading-none">{m.year}</span>
+            key={frame}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="px-8 md:px-16 flex flex-col gap-20 mt-16"
+          >
+            {[m0, m1].filter(Boolean).map((m) => (
+              <div key={m.year} className="flex gap-10 md:gap-16 items-start">
+                {/* Year — very large */}
+                <div className="flex-none" style={{ minWidth: '120px' }}>
+                  <span
+                    className="font-display text-nature-brown leading-none"
+                    style={{ fontSize: 'clamp(56px, 7vw, 100px)' }}
+                  >
+                    {m.year}
+                  </span>
                 </div>
-
-                {/* Dot */}
-                <div className="flex-none hidden md:flex items-start pt-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-nature-brown border-2 border-almond-cream shadow-[0_0_0_3px_rgba(206,132,0,0.2)]" />
-                </div>
-
+                {/* Vertical divider */}
+                <div className="flex-none w-px self-stretch bg-coffee-brown/20 mt-2" />
                 {/* Content */}
-                <div className="flex-1 pb-2">
-                  <h3 className="font-display text-dark-wood text-2xl mb-2 leading-tight">
+                <div className="flex-1 pt-2">
+                  <h3
+                    className="font-display text-dark-wood leading-tight mb-4"
+                    style={{ fontSize: 'clamp(28px, 3.5vw, 48px)' }}
+                  >
                     {m.title}
                   </h3>
-                  <p className="font-body font-light text-dark-wood/60 text-sm leading-relaxed max-w-lg">
+                  <p className="font-body font-light text-dark-wood/60 text-base md:text-lg leading-relaxed max-w-lg">
                     {m.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Scroll progress indicator */}
+        <div className="absolute bottom-8 left-8 md:left-16 flex gap-2 items-center">
+          {[0, 1, 2].map((f) => (
+            <div
+              key={f}
+              className="h-px transition-all duration-500"
+              style={{
+                width: f === frame ? '48px' : '16px',
+                background: f === frame ? '#CE8400' : 'rgba(117,73,43,0.3)',
+              }}
+            />
+          ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

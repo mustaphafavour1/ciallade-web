@@ -1,147 +1,203 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
-import Image from 'next/image';
-import { fadeUp, staggerContainer, reducedVariant } from '@/lib/animations';
+import { useRef, useState, useEffect } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+
+const COLS = 8;
+const ROWS = 8;
+const TOTAL = COLS * ROWS;
+
+// Stagger order: diagonal wave pattern for a pixel-scatter feel
+function buildRevealOrder(): number[] {
+  const indices = Array.from({ length: TOTAL }, (_, i) => i);
+  return indices.sort((a, b) => {
+    const ax = a % COLS, ay = Math.floor(a / COLS);
+    const bx = b % COLS, by = Math.floor(b / COLS);
+    return (ax + ay) - (bx + by);
+  });
+}
+const REVEAL_ORDER = buildRevealOrder();
 
 export default function EditorialSection() {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const shouldReduce = useReducedMotion();
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
 
-  const containerVariants = shouldReduce ? {} : staggerContainer;
-  const itemVariants = shouldReduce ? reducedVariant : fadeUp;
+  useEffect(() => {
+    if (!inView) return;
+    setRevealed(new Set());
+    REVEAL_ORDER.forEach((idx, order) => {
+      setTimeout(() => {
+        setRevealed((prev) => new Set([...prev, idx]));
+      }, order * 18); // 18ms per square × 64 squares = ~1.15s total
+    });
+  }, [inView]);
 
-  const strokeVariant: Variants = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: {
-      pathLength: 1,
-      opacity: 0.4,
-      transition: { duration: 2, ease: 'easeInOut' as const },
-    },
-  };
+  // Sniper crosshair SVG overlay
+  const SniperFrame = () => (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none z-20"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+    >
+      {/* Outer circle scope */}
+      <motion.circle
+        cx="50" cy="50" r="42"
+        fill="none" stroke="#CE8400" strokeWidth="0.4" strokeDasharray="2 1"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={inView ? { pathLength: 1, opacity: 0.6 } : {}}
+        transition={{ delay: 0.2, duration: 1.5, ease: 'easeInOut' }}
+      />
+      {/* Inner circle */}
+      <motion.circle
+        cx="50" cy="50" r="6"
+        fill="none" stroke="#CE8400" strokeWidth="0.5"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={inView ? { scale: 1, opacity: 0.9 } : {}}
+        transition={{ delay: 1.2, duration: 0.4 }}
+      />
+      {/* Center dot */}
+      <motion.circle
+        cx="50" cy="50" r="1"
+        fill="#CE8400"
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ delay: 1.4, duration: 0.2 }}
+      />
+      {/* Horizontal crosshair — left segment */}
+      <motion.line x1="2" y1="50" x2="42" y2="50"
+        stroke="#CE8400" strokeWidth="0.5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={inView ? { pathLength: 1, opacity: 0.7 } : {}}
+        transition={{ delay: 0.6, duration: 0.5 }}
+      />
+      {/* Horizontal crosshair — right segment */}
+      <motion.line x1="58" y1="50" x2="98" y2="50"
+        stroke="#CE8400" strokeWidth="0.5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={inView ? { pathLength: 1, opacity: 0.7 } : {}}
+        transition={{ delay: 0.7, duration: 0.5 }}
+      />
+      {/* Vertical crosshair — top segment */}
+      <motion.line x1="50" y1="2" x2="50" y2="42"
+        stroke="#CE8400" strokeWidth="0.5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={inView ? { pathLength: 1, opacity: 0.7 } : {}}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      />
+      {/* Vertical crosshair — bottom segment */}
+      <motion.line x1="50" y1="58" x2="50" y2="98"
+        stroke="#CE8400" strokeWidth="0.5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={inView ? { pathLength: 1, opacity: 0.7 } : {}}
+        transition={{ delay: 0.9, duration: 0.5 }}
+      />
+      {/* Distance tick marks on horizontal crosshair */}
+      {[20, 30, 70, 80].map((x) => (
+        <motion.line key={`ht${x}`} x1={x} y1="48" x2={x} y2="52"
+          stroke="#CE8400" strokeWidth="0.4"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 0.5 } : {}}
+          transition={{ delay: 1.1 }}
+        />
+      ))}
+      {/* Distance tick marks on vertical crosshair */}
+      {[20, 30, 70, 80].map((y) => (
+        <motion.line key={`vt${y}`} x1="48" y1={y} x2="52" y2={y}
+          stroke="#CE8400" strokeWidth="0.4"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 0.5 } : {}}
+          transition={{ delay: 1.1 }}
+        />
+      ))}
+      {/* Corner L-brackets */}
+      {[
+        { x1: 2, y1: 12, x2: 2, y2: 2, x3: 12, y3: 2 },
+        { x1: 98, y1: 12, x2: 98, y2: 2, x3: 88, y3: 2 },
+        { x1: 2, y1: 88, x2: 2, y2: 98, x3: 12, y3: 98 },
+        { x1: 98, y1: 88, x2: 98, y2: 98, x3: 88, y3: 98 },
+      ].map((c, i) => (
+        <motion.polyline
+          key={i}
+          points={`${c.x1},${c.y1} ${c.x2},${c.y2} ${c.x3},${c.y3}`}
+          fill="none" stroke="#CE8400" strokeWidth="1.2"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={inView ? { pathLength: 1, opacity: 1 } : {}}
+          transition={{ delay: 0.4 + i * 0.06, duration: 0.4 }}
+        />
+      ))}
+    </svg>
+  );
 
   return (
-    <section ref={ref} className="relative bg-dark-wood overflow-hidden py-24">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate={inView ? 'visible' : 'hidden'}
-        className="relative z-10 flex flex-col items-center"
-      >
-        <motion.p variants={itemVariants} className="label-text text-xs text-nature-brown mb-6">
+    <section ref={ref} className="relative bg-dark-wood overflow-hidden py-40">
+      <div className="relative z-10 flex flex-col items-center">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="label-text text-xs text-nature-brown mb-6"
+        >
           SS 2026 Campaign
         </motion.p>
 
         <motion.h2
-          variants={itemVariants}
-          className="font-display text-almond-cream text-4xl md:text-6xl lg:text-7xl text-center leading-tight mb-12 max-w-2xl"
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="font-display text-almond-cream text-4xl md:text-6xl lg:text-7xl text-center leading-tight mb-16 max-w-2xl"
         >
           Define the moment.<br />
           <span className="text-nature-brown">Own the frame.</span>
         </motion.h2>
 
-        {/* Campaign image with geometric frame */}
-        <motion.div
-          variants={itemVariants}
-          className="relative w-full max-w-4xl mx-auto px-6 md:px-12"
-        >
-          {/* Animated geometric frame */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none z-10"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            {!shouldReduce && (
-              <>
-                <motion.rect
-                  x="2" y="2" width="96" height="96"
-                  fill="none" stroke="#CE8400" strokeWidth="0.3"
-                  variants={strokeVariant}
-                  initial="hidden"
-                  animate={inView ? 'visible' : 'hidden'}
-                />
-                <motion.line
-                  x1="2" y1="2" x2="15" y2="2"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 0.8, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="2" y1="2" x2="2" y2="15"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 0.9, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="98" y1="2" x2="85" y2="2"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.0, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="98" y1="2" x2="98" y2="15"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.1, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="2" y1="98" x2="15" y2="98"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.2, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="2" y1="98" x2="2" y2="85"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.3, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="98" y1="98" x2="85" y2="98"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.4, duration: 0.6, ease: 'easeOut' }}
-                />
-                <motion.line
-                  x1="98" y1="98" x2="98" y2="85"
-                  stroke="#CE8400" strokeWidth="0.8"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-                  transition={{ delay: 1.5, duration: 0.6, ease: 'easeOut' }}
-                />
-              </>
-            )}
-          </svg>
+        {/* Square image with sniper frame */}
+        <div className="relative w-full max-w-[600px] mx-auto px-6 md:px-0">
+          <SniperFrame />
 
-          <div className="relative" style={{ aspectRatio: '16/9' }}>
-            <Image
-              src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&h=675&q=80"
+          {/* Pixel grid container — square */}
+          <div
+            className="relative overflow-hidden"
+            style={{ aspectRatio: '1/1' }}
+          >
+            {/* Background image (always mounted) */}
+            <img
+              src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&h=800&q=80"
               alt="Ciallade SS 2026 editorial campaign"
-              fill
-              sizes="(max-width: 768px) 100vw, 80vw"
-              className="object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
+
+            {/* Pixel overlay: 8×8 grid of dark squares that hide, then reveal */}
+            <div
+              className="absolute inset-0 grid"
+              style={{
+                gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+                gridTemplateRows: `repeat(${ROWS}, 1fr)`,
+              }}
+            >
+              {Array.from({ length: TOTAL }, (_, idx) => (
+                <motion.div
+                  key={idx}
+                  className="bg-dark-wood"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: revealed.has(idx) ? 0 : 1 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                />
+              ))}
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         <motion.a
-          variants={itemVariants}
           href="/collections"
-          className="mt-12 inline-block border border-nature-brown text-nature-brown font-body label-text text-xs px-10 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
+          initial={{ opacity: 0, y: 10 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 1.8, duration: 0.6 }}
+          className="mt-16 inline-block border border-nature-brown text-nature-brown font-body label-text text-xs px-10 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
         >
           Explore the Campaign
         </motion.a>
-      </motion.div>
+      </div>
     </section>
   );
 }

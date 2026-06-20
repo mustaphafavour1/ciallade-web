@@ -144,9 +144,9 @@ function ClothingCycle() {
                 d={d}
                 fill="none"
                 stroke="#CE8400"
-                strokeWidth="0.8"
-                strokeDasharray="5 3"
-                strokeLinecap="butt"
+                strokeWidth="0.22"
+                strokeDasharray="2 5"
+                strokeLinecap="round"
                 strokeLinejoin="round"
                 custom={i}
                 variants={pathVariants}

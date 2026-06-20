@@ -5,26 +5,10 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { staggerContainer, fadeUp, reducedVariant } from '@/lib/animations';
 
 const DIFF = [
-  {
-    contrast: 'Mass-produced in silence',
-    ciallade: 'Crafted with deliberate intention — every stitch chosen, not assumed.',
-    sym: '⊙',
-  },
-  {
-    contrast: 'European luxury as the standard',
-    ciallade: 'African luxury on its own terms. No apology. No imitation.',
-    sym: '◈',
-  },
-  {
-    contrast: 'Fashion as trend',
-    ciallade: 'Fashion as language. What you wear is what you say.',
-    sym: '∿',
-  },
-  {
-    contrast: 'Fitting into a mold',
-    ciallade: 'Defining your own silhouette, on your own terms.',
-    sym: '⊕',
-  },
+  { contrast: 'Mass-produced. Silent. Assumed.', ciallade: 'Crafted with deliberate intention.', sym: '⊙' },
+  { contrast: 'European luxury as the standard.', ciallade: 'African luxury, on its own terms.', sym: '◈' },
+  { contrast: 'Fashion as trend. Follow or fade.', ciallade: 'Fashion as language. You are what you wear.', sym: '∿' },
+  { contrast: 'Fitting into the mold.', ciallade: 'Defining your own silhouette.', sym: '⊕' },
 ];
 
 export default function TheDifference() {
@@ -35,7 +19,7 @@ export default function TheDifference() {
   const item = shouldReduce ? reducedVariant : fadeUp;
 
   return (
-    <section ref={ref} className="relative bg-dark-wood py-24 overflow-hidden">
+    <section ref={ref} className="relative bg-dark-wood py-40 overflow-hidden">
       <div className="relative z-10 px-6 md:px-12">
         <motion.p
           variants={item}
@@ -50,53 +34,60 @@ export default function TheDifference() {
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
           transition={{ delay: 0.08 }}
-          className="font-display text-almond-cream text-4xl md:text-5xl mb-16 leading-tight max-w-lg"
+          className="font-display text-almond-cream text-4xl md:text-5xl mb-20 leading-tight max-w-lg"
         >
           The Difference
         </motion.h2>
 
+        {/* CIALLADE ROW (top) */}
         <motion.div
           variants={container}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 md:grid-cols-2 gap-px bg-nature-brown/10"
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12"
         >
           {DIFF.map((d, i) => (
             <motion.div
               key={i}
               variants={item}
               transition={{ delay: i * 0.08 }}
-              className="bg-dark-wood p-10 group relative overflow-hidden"
             >
-              {/* Hover fill */}
-              <motion.div
-                className="absolute inset-0 bg-nature-brown/5 origin-left"
-                initial={{ scaleX: 0 }}
-                whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              />
+              <span className="block font-display text-nature-brown/30 text-2xl mb-3" aria-hidden>{d.sym}</span>
+              <p className="font-body text-almond-cream/90 text-base md:text-lg leading-snug font-medium">
+                {d.ciallade}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
 
-              <span
-                className="block text-nature-brown/25 mb-6 font-display relative z-10"
-                style={{ fontSize: '36px' }}
-                aria-hidden="true"
-              >
-                {d.sym}
-              </span>
+        {/* DIVIDER LINE with centered label */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className="relative flex items-center gap-4 my-2 mb-12"
+        >
+          <div className="flex-1 h-px bg-nature-brown/30" />
+          <span className="label-text text-[10px] text-nature-brown/50 tracking-[0.3em] px-4">VERSUS</span>
+          <div className="flex-1 h-px bg-nature-brown/30" />
+        </motion.div>
 
-              {/* Industry line */}
-              <div className="relative z-10 mb-5 flex items-start gap-3">
-                <span className="mt-1 flex-none w-3 h-px bg-almond-cream/20 translate-y-2" />
-                <p className="font-body font-light text-almond-cream/30 text-sm line-through decoration-almond-cream/20">
-                  {d.contrast}
-                </p>
-              </div>
-
-              {/* Ciallade line */}
-              <div className="relative z-10 flex items-start gap-3">
-                <span className="mt-1 flex-none w-3 h-px bg-nature-brown" />
-                <p className="font-body text-almond-cream/85 text-base leading-snug">{d.ciallade}</p>
-              </div>
+        {/* INDUSTRY ROW (bottom) */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+        >
+          {DIFF.map((d, i) => (
+            <motion.div
+              key={i}
+              variants={item}
+              transition={{ delay: 0.6 + i * 0.08 }}
+            >
+              <p className="font-body font-light text-almond-cream/25 text-sm leading-snug line-through decoration-almond-cream/15">
+                {d.contrast}
+              </p>
             </motion.div>
           ))}
         </motion.div>

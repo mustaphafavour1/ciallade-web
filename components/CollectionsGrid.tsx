@@ -36,19 +36,26 @@ const categories = [
   },
 ];
 
-// Desktop scatter positions (top/left as % of the section container)
-const SCATTER: { top: string; left: string }[] = [
-  { top: '15%', left: '5%' },
-  { top: '30%', left: '45%' },
-  { top: '52%', left: '15%' },
-  { top: '65%', left: '55%' },
-  { top: '78%', left: '8%' },
+// Desktop scatter positions:
+// 0 = Ready-to-Wear  → upper-left
+// 1 = Headwear       → upper-right
+// 2 = Statement Pieces → center (translateX(-50%) applied inline)
+// 3 = Bottoms        → lower-left
+// 4 = Jackets        → lower-right
+const SCATTER: { top: string; left: string; transform?: string }[] = [
+  { top: '12%', left: '8%' },
+  { top: '10%', left: '58%' },
+  { top: '42%', left: '32%', transform: 'translateX(-50%)' },
+  { top: '70%', left: '5%' },
+  { top: '68%', left: '58%' },
 ];
 
 const CYCLE_MS = 3000;
 
 export default function CollectionsGrid() {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const displayIdx = hoveredIdx !== null ? hoveredIdx : activeIdx;
 
   useEffect(() => {
     const id = setInterval(
@@ -59,7 +66,7 @@ export default function CollectionsGrid() {
   }, []);
 
   return (
-    <section className="bg-dark-wood py-24 px-6 md:px-12 relative min-h-[70vh]">
+    <section className="bg-dark-wood py-40 px-6 md:px-12 relative min-h-[70vh]">
       {/* Header */}
       <div className="mb-12 relative z-10">
         <p className="label-text text-xs text-nature-brown mb-3">Explore</p>
@@ -71,16 +78,20 @@ export default function CollectionsGrid() {
       {/* ── Mobile: simple vertical list ── */}
       <div className="flex flex-col gap-6 md:hidden">
         {categories.map((cat, i) => {
-          const isActive = i === activeIdx;
+          const isActive = i === displayIdx;
           return (
             <Link key={cat.slug} href={`/collections?category=${cat.slug}`}>
-              <div className="flex items-center gap-4 cursor-pointer">
+              <div
+                className="flex items-center gap-4 cursor-pointer"
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              >
                 <motion.div
                   animate={{
-                    width: isActive ? 180 : 28,
-                    height: isActive ? 240 : 28,
+                    width: isActive ? 310 : 28,
+                    height: isActive ? 450 : 28,
                   }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                   className="relative overflow-hidden flex-none"
                   style={{ borderRadius: 2 }}
                 >
@@ -89,12 +100,12 @@ export default function CollectionsGrid() {
                     fill
                     className="object-cover"
                     alt={cat.label}
-                    sizes="180px"
+                    sizes="310px"
                   />
                 </motion.div>
                 <motion.p
                   animate={{ color: isActive ? '#CE8400' : 'rgba(255,235,205,0.7)' }}
-                  className="font-display text-2xl"
+                  className="font-display text-3xl md:text-4xl"
                 >
                   {cat.label}
                 </motion.p>
@@ -105,24 +116,30 @@ export default function CollectionsGrid() {
       </div>
 
       {/* ── Desktop: scattered absolute layout ── */}
-      <div className="hidden md:block relative" style={{ minHeight: '70vh' }}>
+      <div className="hidden md:block relative" style={{ minHeight: '85vh' }}>
         {categories.map((cat, i) => {
-          const isActive = i === activeIdx;
+          const isActive = i === displayIdx;
           const pos = SCATTER[i];
           return (
             <div
               key={cat.slug}
               className="absolute"
-              style={{ top: pos.top, left: pos.left }}
+              style={{
+                top: pos.top,
+                left: pos.left,
+                transform: pos.transform,
+              }}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
             >
               <Link href={`/collections?category=${cat.slug}`}>
                 <div className="flex items-center gap-3 group cursor-pointer">
                   <motion.div
                     animate={{
-                      width: isActive ? 180 : 28,
-                      height: isActive ? 240 : 28,
+                      width: isActive ? 310 : 28,
+                      height: isActive ? 450 : 28,
                     }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                     className="relative overflow-hidden flex-none"
                     style={{ borderRadius: 2 }}
                   >
@@ -131,12 +148,12 @@ export default function CollectionsGrid() {
                       fill
                       className="object-cover"
                       alt={cat.label}
-                      sizes="(min-width: 768px) 180px, 28px"
+                      sizes="(min-width: 768px) 310px, 28px"
                     />
                   </motion.div>
                   <motion.p
                     animate={{ color: isActive ? '#CE8400' : 'rgba(255,235,205,0.7)' }}
-                    className="font-display text-2xl md:text-3xl whitespace-nowrap"
+                    className="font-display text-3xl md:text-4xl whitespace-nowrap"
                   >
                     {cat.label}
                   </motion.p>
