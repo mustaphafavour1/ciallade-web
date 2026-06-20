@@ -10,10 +10,14 @@ const CLOTHES = [
     label: 'Short-sleeve Shirt',
     viewBox: '0 0 100 130',
     paths: [
-      'M 38,14 C 40,7 60,7 62,14 L 75,17 L 94,33 L 87,46 L 78,39 L 78,112 L 22,112 L 22,39 L 13,46 L 6,33 L 25,17 Z',
-      'M 50,8 L 44,28 L 38,14 M 50,8 L 56,28 L 62,14',
-      'M 47,34 L 53,34 M 47,48 L 53,48 M 47,62 L 53,62',
-      'M 32,44 L 48,44 L 48,56 L 32,56',
+      // Path 1: Full outer silhouette — shoulder slope, V-collar, short sleeves, body
+      'M 38,15 C 39,9 42,7 50,7 C 58,7 61,9 62,15 L 70,18 C 74,19 80,22 86,28 L 92,35 L 86,46 L 78,41 L 78,112 L 22,112 L 22,41 L 14,46 L 8,35 L 14,28 C 20,22 26,19 30,18 Z',
+      // Path 2: Collar — two triangular pointed collar leaves in V opening
+      'M 38,15 C 40,20 44,25 50,30 C 56,25 60,20 62,15 M 46,15 C 47,22 48,26 50,30 M 54,15 C 53,22 52,26 50,30',
+      // Path 3: Button placket center line + buttons
+      'M 50,30 L 50,110 M 48,42 L 52,42 M 48,55 L 52,55 M 48,68 L 52,68 M 48,81 L 52,81',
+      // Path 4: Breast pocket (left chest)
+      'M 27,46 L 44,46 L 44,58 L 27,58 L 27,46 M 27,46 L 44,46',
     ],
   },
   {
@@ -21,54 +25,74 @@ const CLOTHES = [
     label: 'Long-sleeve Shirt',
     viewBox: '0 0 100 130',
     paths: [
-      'M 38,14 C 40,7 60,7 62,14 L 76,18 L 97,60 L 90,67 L 78,52 L 78,112 L 22,112 L 22,52 L 10,67 L 3,60 L 24,18 Z',
-      'M 50,8 L 44,28 L 38,14 M 50,8 L 56,28 L 62,14',
-      'M 47,34 L 53,34 M 47,48 L 53,48 M 47,62 L 53,62',
-      'M 90,65 L 78,51 M 10,65 L 22,51',
+      // Path 1: Full silhouette — long sleeves tapering to narrow wrist
+      'M 38,15 C 39,9 42,7 50,7 C 58,7 61,9 62,15 L 70,18 C 74,19 80,22 88,32 L 96,70 L 96,78 L 84,78 L 82,68 C 80,58 79,50 78,41 L 78,112 L 22,112 L 22,41 C 21,50 20,58 18,68 L 16,78 L 4,78 L 4,70 L 12,32 C 20,22 26,19 30,18 Z',
+      // Path 2: Collar — pointed collar in V
+      'M 38,15 C 40,20 44,25 50,30 C 56,25 60,20 62,15 M 46,15 C 47,22 48,26 50,30 M 54,15 C 53,22 52,26 50,30',
+      // Path 3: Button placket + buttons
+      'M 50,30 L 50,110 M 48,42 L 52,42 M 48,55 L 52,55 M 48,68 L 52,68 M 48,81 L 52,81',
+      // Path 4: Cuff bands at each wrist (double horizontal lines)
+      'M 4,70 L 16,70 M 4,74 L 16,74 M 84,70 L 96,70 M 84,74 L 96,74',
     ],
   },
   {
     id: 'trousers',
     label: 'Trousers',
-    viewBox: '0 0 80 145',
+    viewBox: '0 0 80 150',
     paths: [
-      'M 14,6 L 66,6 Q 70,32 65,56 L 60,138 L 46,138 L 43,70 Q 42,67 40,66 Q 38,67 37,70 L 34,138 L 20,138 L 15,56 Q 10,32 14,12 Z',
-      'M 14,6 L 66,6 L 66,20 L 14,20',
-      'M 22,6 L 22,20 M 40,6 L 40,20 M 58,6 L 58,20',
-      'M 53,56 L 56,138 M 27,56 L 24,138',
+      // Path 1: Full silhouette — high waist, two legs with hip curve, straight/tapered
+      'M 12,22 Q 14,10 16,8 L 64,8 Q 66,10 68,22 Q 72,40 66,60 L 60,142 L 44,142 L 40,80 Q 40,72 40,70 Q 40,72 40,80 L 36,142 L 20,142 L 14,60 Q 8,40 12,22 Z',
+      // Path 2: Waistband — double horizontal lines
+      'M 12,22 L 68,22 M 12,14 L 68,14',
+      // Path 3: Belt loops (5 small rectangles on waistband)
+      'M 17,8 L 17,22 M 28,8 L 28,22 M 40,8 L 40,22 M 52,8 L 52,22 M 63,8 L 63,22',
+      // Path 4: Crease lines + diagonal slash pockets at hip
+      'M 32,22 C 35,50 37,90 38,142 M 48,22 C 45,50 43,90 42,142 M 20,25 L 32,40 M 60,25 L 48,40',
     ],
   },
   {
     id: 'tshirt',
     label: 'Roundneck',
-    viewBox: '0 0 100 130',
+    viewBox: '0 0 100 120',
     paths: [
-      'M 40,13 Q 50,5 60,13 L 74,17 L 89,30 L 82,44 L 74,38 L 74,112 L 26,112 L 26,38 L 18,44 L 11,30 L 26,17 Z',
-      'M 40,13 Q 50,22 60,13',
-      'M 26,38 L 18,44 M 74,38 L 82,44',
-      'M 42,60 L 42,76 L 58,76 L 58,60',
+      // Path 1: Full silhouette — round neck, short set-in sleeves, clean body
+      'M 42,14 Q 50,7 58,14 L 68,17 Q 76,20 84,28 L 90,37 L 82,46 L 74,40 L 74,112 L 26,112 L 26,40 L 18,46 L 10,37 L 16,28 Q 24,20 32,17 Z',
+      // Path 2: Neckband — two concentric curves for the crew neck rib
+      'M 42,14 Q 50,22 58,14 M 43,18 Q 50,26 57,18',
+      // Path 3: Sleeve hem lines at armhole seam
+      'M 26,40 Q 22,38 18,40 M 74,40 Q 78,38 82,40',
+      // Path 4: Subtle side seams and hem
+      'M 26,40 L 26,112 M 74,40 L 74,112 M 26,112 L 74,112',
     ],
   },
   {
     id: 'jacket',
     label: 'Jacket',
-    viewBox: '0 0 100 132',
+    viewBox: '0 0 100 135',
     paths: [
-      'M 40,10 Q 44,19 50,28 Q 56,19 60,10 L 76,14 L 95,28 L 88,42 L 78,36 L 78,122 L 22,122 L 22,36 L 12,42 L 5,28 L 24,14 Z',
-      'M 40,10 L 46,30 L 50,28 M 60,10 L 54,30 L 50,28',
-      'M 28,52 L 46,52',
-      'M 24,86 L 48,86 L 48,96 L 24,96 M 52,86 L 76,86 L 76,96 L 52,96',
+      // Path 1: Full blazer silhouette — padded shoulders, long sleeves, open front with lapels
+      'M 38,12 Q 40,7 50,7 Q 60,7 62,12 L 74,15 Q 82,18 90,26 L 96,50 L 96,62 L 84,60 L 82,120 L 18,120 L 16,60 L 4,62 L 4,50 L 10,26 Q 18,18 26,15 Z',
+      // Path 2: Lapels — triangular flaps from shoulder down to chest on each side
+      'M 38,12 L 44,32 Q 46,40 50,46 Q 54,40 56,32 L 62,12 M 38,12 L 36,28 Q 34,36 36,46 L 50,46 M 62,12 L 64,28 Q 66,36 64,46 L 50,46',
+      // Path 3: Two front buttons on placket
+      'M 48,58 L 52,58 M 48,72 L 52,72',
+      // Path 4: Two welt pocket flaps (one each side, lower front)
+      'M 14,88 L 40,88 L 40,96 L 14,96 M 60,88 L 86,88 L 86,96 L 60,96',
     ],
   },
   {
     id: 'native',
     label: 'Native Top',
-    viewBox: '0 0 120 130',
+    viewBox: '0 0 130 130',
     paths: [
-      'M 60,8 L 44,12 L 4,22 L 4,56 L 30,48 L 30,120 L 90,120 L 90,48 L 116,56 L 116,22 L 76,12 Z',
-      'M 60,10 L 60,74',
-      'M 52,10 L 56,6 L 60,8 L 64,6 L 68,10 L 64,14 L 60,16 L 56,14 Z',
-      'M 4,48 L 30,42 M 116,48 L 90,42 M 30,112 L 90,112',
+      // Path 1: Agbada — very wide flowing sleeves, wide hem, center slit
+      'M 65,10 L 52,12 L 4,20 L 4,52 L 32,44 L 32,118 L 98,118 L 98,44 L 126,52 L 126,20 L 78,12 Z',
+      // Path 2: Center front opening/slit from neckline to hem
+      'M 65,14 L 65,118',
+      // Path 3: Decorative geometric embroidery at neckline — diamond/star pattern
+      'M 65,14 L 72,22 L 65,30 L 58,22 Z M 65,14 L 65,10 M 65,30 L 65,34 M 58,22 L 54,22 M 72,22 L 76,22',
+      // Path 4: Sleeve border/trim lines parallel to edges + hem trim
+      'M 4,44 L 32,38 M 126,44 L 98,38 M 32,112 L 98,112 M 8,26 L 32,20 M 122,26 L 98,20',
     ],
   },
 ];
@@ -120,9 +144,9 @@ function ClothingCycle() {
                 d={d}
                 fill="none"
                 stroke="#CE8400"
-                strokeWidth="1.2"
-                strokeDasharray="0.1 5"
-                strokeLinecap="round"
+                strokeWidth="0.8"
+                strokeDasharray="5 3"
+                strokeLinecap="butt"
                 strokeLinejoin="round"
                 custom={i}
                 variants={pathVariants}
@@ -181,7 +205,7 @@ export default function Hero() {
         </p>
         <h2
           className="font-display text-almond-cream/90 leading-[0.92]"
-          style={{ fontSize: 'clamp(26px, 3.2vw, 50px)' }}
+          style={{ fontSize: 'clamp(39px, 4.8vw, 75px)' }}
         >
           Be <span className="text-nature-brown">Yourself.</span>
         </h2>
@@ -206,7 +230,7 @@ export default function Hero() {
       <div className="absolute bottom-10 left-0 right-0 px-8 md:px-12 z-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <motion.p
-            className="font-body font-light text-almond-cream/45 text-sm leading-relaxed max-w-[240px]"
+            className="font-body font-light text-almond-cream/45 text-base leading-relaxed max-w-[240px]"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}

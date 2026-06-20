@@ -1,92 +1,117 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
-import { fadeUp, slideInLeft, slideInRight, reducedVariant } from '@/lib/animations';
-import BYRAPattern from './BYRAPattern';
+
+const PHILOSOPHY_TEXT = `Ciallade exists at the intersection of identity and craft.
+
+We believe clothing is not decoration — it is declaration. Every silhouette we design begins not with a sketch but with a question: who is this person, and what do they need the world to know about them?
+
+Fashion, in its truest form, is a private language made public. The choice of fabric, the fall of a collar, the weight of a lapel — these are not accidents. They are arguments. Arguments for presence. For particularity. For the right to take up space in the world as you truly are.
+
+Nigeria gave us our roots, our palette, our hunger. Africa gave us our proportion — our understanding that beauty is not a size, a shade, or a silhouette borrowed from elsewhere. It is earned, learned, and worn with the confidence of someone who needed no permission to arrive.
+
+We are not competing with the houses of Milan or Paris. We are building something they cannot replicate: a house built on a different inheritance. One that knows the weight of aso-oke and the precision of a bespoke Lagos tailor at midnight before a ceremony. One that carries both.
+
+Ciallade is for those who already know who they are — and simply need clothing that agrees.`;
 
 export default function BrandPhilosophy() {
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  const shouldReduce = useReducedMotion();
+  const outerRef = useRef<HTMLDivElement>(null);
 
-  const leftVariant = shouldReduce ? reducedVariant : slideInLeft;
-  const rightVariant = shouldReduce ? reducedVariant : slideInRight;
-  const upVariant = shouldReduce ? reducedVariant : fadeUp;
+  const { scrollYProgress } = useScroll({
+    target: outerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // clipPath reveals the filled text from top to bottom as scroll progresses
+  const clipPath = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ['inset(0 0 100% 0)', 'inset(0 0 0% 0)']
+  );
 
   return (
-    <section ref={ref} className="relative bg-almond-cream overflow-hidden">
-      <BYRAPattern color="#1C1004" opacity={0.04} animated={false} />
+    // Outer scroll container — tall so there's room to scroll through the text
+    <div ref={outerRef} className="relative" style={{ minHeight: '250vh' }}>
+      {/* Sticky inner: left image + right text, stays in viewport while scrolling */}
+      <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]">
-        {/* Left: editorial image */}
-        <motion.div
-          variants={leftVariant}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="relative min-h-[50vh] lg:min-h-[80vh]"
-        >
-          <Image
-            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
-            alt="Ciallade brand editorial — warm tones, structured silhouette"
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
-          />
-        </motion.div>
+          {/* Left half: editorial image, fills full height */}
+          <div className="relative min-h-[45vh] lg:min-h-0">
+            <Image
+              src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
+              alt="Ciallade brand editorial — warm tones, structured silhouette"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              priority
+            />
+            {/* Right edge fade to blend into the right panel */}
+            <div
+              className="absolute inset-y-0 right-0 w-16 hidden lg:block"
+              style={{
+                background: 'linear-gradient(to right, transparent, #1C1004)',
+              }}
+            />
+          </div>
 
-        {/* Right: quote and text */}
-        <motion.div
-          variants={rightVariant}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="flex flex-col justify-center px-8 md:px-14 lg:px-16 py-20"
-        >
-          <motion.p
-            variants={upVariant}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            transition={{ delay: 0.2 }}
-            className="label-text text-xs text-coffee-brown mb-8"
+          {/* Right half: dark background, scroll-fill text */}
+          <div
+            className="flex flex-col justify-center h-full px-8 md:px-12 py-20 overflow-y-auto lg:overflow-hidden"
+            style={{ background: '#1C1004' }}
           >
-            Brand Philosophy
-          </motion.p>
+            <p className="label-text text-xs text-nature-brown tracking-widest mb-6">
+              Brand Philosophy
+            </p>
 
-          <motion.blockquote
-            variants={upVariant}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            transition={{ delay: 0.35 }}
-            className="font-display text-dark-wood leading-[0.92] mb-8"
-            style={{ fontSize: 'clamp(36px, 5vw, 72px)' }}
-          >
-            &ldquo;Wear who<br />you are.<br />Wear it<br />
-            <span className="text-nature-brown">boldly.&rdquo;</span>
-          </motion.blockquote>
+            <h2
+              className="font-display text-almond-cream leading-tight mb-10"
+              style={{ fontSize: 'clamp(28px, 3.5vw, 44px)' }}
+            >
+              Wear who you are.
+            </h2>
 
-          <motion.p
-            variants={upVariant}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            transition={{ delay: 0.5 }}
-            className="font-body font-light text-dark-wood/70 text-base leading-relaxed max-w-sm"
-          >
-            Ciallade was born from a conviction — that fashion is not a costume but a declaration. Every piece is designed to amplify the person wearing it, never to replace them.
-          </motion.p>
+            {/* Scroll-driven outline-fill text effect */}
+            <div className="relative mb-10">
+              {/* Outline layer — always visible */}
+              <p
+                className="font-body font-light leading-relaxed whitespace-pre-line"
+                style={{
+                  fontSize: 'clamp(16px, 1.8vw, 22px)',
+                  WebkitTextStroke: '0.5px #CE8400',
+                  color: 'transparent',
+                  userSelect: 'none',
+                }}
+              >
+                {PHILOSOPHY_TEXT}
+              </p>
 
-          <motion.a
-            variants={upVariant}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            transition={{ delay: 0.65 }}
-            href="/about"
-            className="mt-10 inline-block label-text text-xs text-dark-wood border-b border-dark-wood/30 hover:border-nature-brown hover:text-nature-brown transition-all duration-300 pb-1 w-fit"
-          >
-            Our Story
-          </motion.a>
-        </motion.div>
+              {/* Filled layer — clips from top to bottom as you scroll */}
+              <motion.p
+                className="font-body font-light leading-relaxed whitespace-pre-line absolute top-0 left-0 w-full"
+                style={{
+                  fontSize: 'clamp(16px, 1.8vw, 22px)',
+                  color: '#CE8400',
+                  clipPath,
+                  pointerEvents: 'none',
+                }}
+              >
+                {PHILOSOPHY_TEXT}
+              </motion.p>
+            </div>
+
+            <a
+              href="/about"
+              className="inline-block label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
+            >
+              Our Story →
+            </a>
+          </div>
+
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
