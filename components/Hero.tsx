@@ -1,84 +1,127 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { motion, useMotionValue, useReducedMotion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 
-const THREADS = [
+// All silhouettes share a 0 0 100 130 viewBox; cap uses 0 0 130 90
+const CLOTHES = [
   {
-    id: 0,
-    d: 'M 0,200 C 350,180 600,350 750,420 C 900,490 1200,380 1440,300',
-    img: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=380&h=570&q=80',
-    label: 'Ochre Linen Top',
+    id: 'shirt',
+    label: 'Short-sleeve Shirt',
+    viewBox: '0 0 100 130',
+    paths: [
+      // neckline (V-curve), right shoulder → sleeve → body, left mirror
+      'M 38,14 C 40,7 60,7 62,14 L 75,17 L 94,33 L 87,46 L 78,39 L 78,112 L 22,112 L 22,39 L 13,46 L 6,33 L 25,17 Z',
+    ],
   },
   {
-    id: 1,
-    d: 'M 0,700 C 300,550 580,430 750,420 C 920,410 1200,290 1440,180',
-    img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=380&h=570&q=80',
-    label: 'Dark Wood Jacket',
+    id: 'trousers',
+    label: 'Trousers',
+    viewBox: '0 0 80 145',
+    paths: [
+      // waistband → seat curves → two legs → crotch point
+      'M 14,6 L 66,6 Q 70,32 65,56 L 60,138 L 46,138 L 43,70 Q 42,67 40,66 Q 38,67 37,70 L 34,138 L 20,138 L 15,56 Q 10,32 14,12 Z',
+    ],
   },
   {
-    id: 2,
-    d: 'M 480,0 C 640,200 720,340 750,420 C 780,500 680,700 480,900',
-    img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=380&h=570&q=80',
-    label: 'Almond Draped Shirt',
+    id: 'tshirt',
+    label: 'Roundneck',
+    viewBox: '0 0 100 130',
+    paths: [
+      // round neck, wider short sleeves
+      'M 40,13 Q 50,5 60,13 L 74,17 L 89,30 L 82,44 L 74,38 L 74,112 L 26,112 L 26,38 L 18,44 L 11,30 L 26,17 Z',
+    ],
   },
   {
-    id: 3,
-    d: 'M 1440,80 C 1200,240 960,370 750,420 C 560,468 260,490 0,460',
-    img: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=380&h=570&q=80',
-    label: 'Statement Coat',
+    id: 'cap',
+    label: 'Cap',
+    viewBox: '0 0 130 90',
+    paths: [
+      // crown dome + band
+      'M 12,64 Q 10,20 58,12 Q 106,20 104,64 L 104,72 Q 58,70 12,72 Z',
+      // brim
+      'M 12,72 Q 58,69 110,76 Q 110,86 100,82 L 104,72',
+    ],
   },
   {
-    id: 4,
-    d: 'M 0,900 C 300,720 560,510 750,420 C 940,330 1200,200 1440,20',
-    img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=380&h=570&q=80',
-    label: 'Maroon Trousers',
+    id: 'jacket',
+    label: 'Jacket',
+    viewBox: '0 0 100 132',
+    paths: [
+      // lapels (V opens to chest), longer body than shirt
+      'M 40,10 Q 44,19 50,28 Q 56,19 60,10 L 76,14 L 95,28 L 88,42 L 78,36 L 78,122 L 22,122 L 22,36 L 12,42 L 5,28 L 24,14 Z',
+    ],
+  },
+  {
+    id: 'native',
+    label: 'Native Top',
+    viewBox: '0 0 120 130',
+    paths: [
+      // agbada-style: very wide sleeves, flowing body
+      'M 60,8 L 44,12 L 4,22 L 4,56 L 30,48 L 30,120 L 90,120 L 90,48 L 116,56 L 116,22 L 76,12 Z',
+      // front centre slit
+      'M 60,10 L 60,74',
+    ],
   },
 ];
 
-export default function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
-  const shouldReduce = useReducedMotion();
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const cardX = useMotionValue(-9999);
-  const cardY = useMotionValue(-9999);
+const INTERVAL = 4400;
 
-  const handleMove = useCallback(
-    (e: React.MouseEvent, id: number) => {
-      if (shouldReduce) return;
-      const hero = heroRef.current;
-      if (!hero) return;
-      const rect = hero.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      const cardH = rect.height * 0.5;
-      const cardW = 200;
-      const gap = 90;
-      let lx = mx + gap;
-      let ly = my - cardH / 2;
-      if (lx + cardW > rect.width - 16) lx = mx - cardW - gap;
-      if (ly < 16) ly = 16;
-      if (ly + cardH > rect.height - 16) ly = rect.height - cardH - 16;
-      cardX.set(lx);
-      cardY.set(ly);
-      setHoveredId(id);
-    },
-    [shouldReduce, cardX, cardY],
+function ClothingCycle() {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % CLOTHES.length), INTERVAL);
+    return () => clearInterval(id);
+  }, []);
+
+  const item = CLOTHES[idx];
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
+      <div
+        className="w-[170px] md:w-[200px]"
+        style={{ height: 'clamp(200px, 26vh, 300px)' }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.svg
+            key={item.id}
+            viewBox={item.viewBox}
+            className="w-full h-full"
+            preserveAspectRatio="xMidYMid meet"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: 'easeInOut' }}
+          >
+            {item.paths.map((d, i) => (
+              <motion.path
+                key={i}
+                d={d}
+                fill="none"
+                stroke="#CE8400"
+                strokeWidth="0.9"
+                strokeDasharray="3 5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2.5, ease: 'easeInOut', delay: i * 0.5 }}
+              />
+            ))}
+          </motion.svg>
+        </AnimatePresence>
+      </div>
+    </div>
   );
+}
 
-  const handleLeave = useCallback(() => {
-    setHoveredId(null);
-    cardX.set(-9999);
-    cardY.set(-9999);
-  }, [cardX, cardY]);
-
-  const hoveredThread = THREADS.find((t) => t.id === hoveredId) ?? null;
+export default function Hero() {
+  const shouldReduce = useReducedMotion();
 
   return (
     <section
-      ref={heroRef}
       className="relative min-h-dvh overflow-hidden"
       style={{
         background: `
@@ -102,92 +145,8 @@ export default function Hero() {
         />
       )}
 
-      {/* Thread lines — visual (no pointer events) */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMid slice"
-        style={{ pointerEvents: 'none' }}
-      >
-        <defs>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Central intersection marker */}
-        <circle cx="750" cy="420" r="3" fill="#CE8400" opacity="0.45" />
-        <circle cx="750" cy="420" r="9" fill="none" stroke="#CE8400" strokeWidth="0.5" opacity="0.25" />
-
-        {/* Connecting thread from "Be Yourself" (top-left) to "Reinvent Always" (centre-right) */}
-        <motion.path
-          d="M 360,130 Q 620,270 880,420"
-          fill="none"
-          stroke="#CE8400"
-          strokeWidth="0.7"
-          strokeDasharray="5 9"
-          strokeLinecap="round"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.5 }}
-          transition={{ delay: 1.6, duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.circle
-          cx="360" cy="130" r="2.5"
-          fill="#CE8400"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 0.5, scale: 1 }}
-          transition={{ delay: 1.55, duration: 0.35 }}
-        />
-
-        {THREADS.map((t, idx) => (
-          <motion.path
-            key={t.id}
-            d={t.d}
-            fill="none"
-            stroke="#CE8400"
-            strokeWidth={hoveredId === t.id ? 1.2 : 0.7}
-            strokeDasharray="5 9"
-            strokeLinecap="round"
-            opacity={hoveredId === t.id ? 0.7 : 0.2}
-            initial={shouldReduce ? undefined : { pathLength: 0, opacity: 0 }}
-            animate={{
-              pathLength: 1,
-              opacity: hoveredId === t.id ? 0.7 : 0.2,
-              strokeWidth: hoveredId === t.id ? 1.2 : 0.7,
-            }}
-            transition={{
-              pathLength: { duration: 2.2, ease: 'easeInOut', delay: 0.5 + idx * 0.25 },
-              opacity: { duration: 0.4 },
-              strokeWidth: { duration: 0.3 },
-            }}
-            filter={hoveredId === t.id ? 'url(#glow)' : undefined}
-          />
-        ))}
-      </svg>
-
-      {/* Thread hit targets */}
-      <svg
-        className="absolute inset-0 w-full h-full z-10"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        {THREADS.map((t) => (
-          <path
-            key={t.id}
-            d={t.d}
-            fill="none"
-            stroke="transparent"
-            strokeWidth="28"
-            style={{ cursor: 'crosshair' }}
-            onMouseMove={(e) => handleMove(e as unknown as React.MouseEvent, t.id)}
-            onMouseLeave={handleLeave}
-          />
-        ))}
-      </svg>
+      {/* Cycling clothing silhouette — centred, behind all text */}
+      {!shouldReduce && <ClothingCycle />}
 
       {/* "Be Yourself" — top left, appears second */}
       <motion.div
@@ -203,8 +162,7 @@ export default function Hero() {
           className="font-display text-almond-cream/90 leading-[0.92]"
           style={{ fontSize: 'clamp(26px, 3.2vw, 50px)' }}
         >
-          Be{' '}
-          <span className="text-nature-brown">Yourself.</span>
+          Be <span className="text-nature-brown">Yourself.</span>
         </h2>
       </motion.div>
 
@@ -223,76 +181,35 @@ export default function Hero() {
         </motion.h1>
       </div>
 
-      {/* Subtitle — bottom left */}
-      <motion.div
-        className="absolute bottom-10 left-8 md:left-12 z-20 max-w-[260px]"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className="font-body font-light text-almond-cream/45 text-sm leading-relaxed">
-          A luxury Nigerian fashion brand
-          <br />
-          crafted for those who define themselves.
-        </p>
-      </motion.div>
-
-      {/* Button — far right */}
-      <motion.div
-        className="absolute bottom-10 right-8 md:right-12 z-20"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <Link
-          href="/collections"
-          className="inline-block border border-nature-brown text-nature-brown label-text text-[10px] px-8 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
-        >
-          Explore Ciallade&apos;s Collection
-        </Link>
-      </motion.div>
-
-      {/* Hover card — follows mouse, flips in/out */}
-      <AnimatePresence mode="wait">
-        {hoveredThread && (
-          <motion.div
-            key={hoveredThread.id}
-            className="absolute z-30 pointer-events-none overflow-hidden"
-            style={{
-              x: cardX,
-              y: cardY,
-              width: 200,
-              height: '50vh',
-              rotate: -4,
-              transformOrigin: 'top center',
-              perspective: 900,
-            }}
-            initial={{ rotateY: 90, opacity: 0 }}
-            animate={{ rotateY: 0, opacity: 1 }}
-            exit={{ rotateY: -90, opacity: 0 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      {/* Bottom row — stacked on mobile (subtitle above button), side-by-side on desktop */}
+      <div className="absolute bottom-10 left-0 right-0 px-8 md:px-12 z-20">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <motion.p
+            className="font-body font-light text-almond-cream/45 text-sm leading-relaxed max-w-[240px]"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Thread connecting card to line */}
-            <div
-              className="absolute top-0 left-1/2 -translate-x-px bg-nature-brown/40 w-px"
-              style={{ height: 20, top: -20 }}
-            />
-            <div className="relative w-full h-full border border-nature-brown/25 shadow-[4px_12px_40px_rgba(0,0,0,0.7)]">
-              <Image
-                src={hoveredThread.img}
-                alt={hoveredThread.label}
-                fill
-                className="object-cover"
-                sizes="200px"
-              />
-              <div className="absolute inset-0 bg-dark-wood/15" />
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-dark-wood/80 to-transparent">
-                <p className="label-text text-[9px] text-nature-brown">{hoveredThread.label}</p>
-              </div>
-            </div>
+            A luxury Nigerian fashion brand
+            <br />
+            crafted for those who define themselves.
+          </motion.p>
+
+          <motion.div
+            className="self-start md:self-auto"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Link
+              href="/collections"
+              className="inline-block border border-nature-brown text-nature-brown label-text text-[10px] px-8 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
+            >
+              Explore Ciallade&apos;s Collection
+            </Link>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      </div>
     </section>
   );
 }
