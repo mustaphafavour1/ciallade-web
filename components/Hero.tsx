@@ -123,6 +123,26 @@ export default function Hero() {
         <circle cx="750" cy="420" r="3" fill="#CE8400" opacity="0.45" />
         <circle cx="750" cy="420" r="9" fill="none" stroke="#CE8400" strokeWidth="0.5" opacity="0.25" />
 
+        {/* Connecting thread from "Be Yourself" (top-left) to "Reinvent Always" (centre-right) */}
+        <motion.path
+          d="M 360,130 Q 620,270 880,420"
+          fill="none"
+          stroke="#CE8400"
+          strokeWidth="0.7"
+          strokeDasharray="5 9"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.5 }}
+          transition={{ delay: 1.6, duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
+        />
+        <motion.circle
+          cx="360" cy="130" r="2.5"
+          fill="#CE8400"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.5, scale: 1 }}
+          transition={{ delay: 1.55, duration: 0.35 }}
+        />
+
         {THREADS.map((t, idx) => (
           <motion.path
             key={t.id}
@@ -203,35 +223,6 @@ export default function Hero() {
         </motion.h1>
       </div>
 
-      {/* Connecting dashed thread between the two copy blocks */}
-      {!shouldReduce && (
-        <svg
-          className="absolute inset-0 w-full h-full z-15 pointer-events-none"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          <motion.path
-            d="M 18,14 Q 46,30 70,44"
-            fill="none"
-            stroke="#CE8400"
-            strokeWidth="0.35"
-            strokeDasharray="1.5 2.5"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.55 }}
-            transition={{ delay: 1.6, duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-          />
-          {/* Small needle dot at the start */}
-          <motion.circle
-            cx="18" cy="14" r="0.8"
-            fill="#CE8400"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 0.6, scale: 1 }}
-            transition={{ delay: 1.55, duration: 0.4 }}
-          />
-        </svg>
-      )}
-
       {/* Subtitle — bottom left */}
       <motion.div
         className="absolute bottom-10 left-8 md:left-12 z-20 max-w-[260px]"
@@ -239,7 +230,7 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
-        <p className="font-body font-light text-almond-cream/45 text-[11px] leading-relaxed">
+        <p className="font-body font-light text-almond-cream/45 text-sm leading-relaxed">
           A luxury Nigerian fashion brand
           <br />
           crafted for those who define themselves.
