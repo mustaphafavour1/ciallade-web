@@ -29,7 +29,7 @@ export default function EditorialSection() {
     setRevealed(new Set());
     REVEAL_ORDER.forEach((idx, order) => {
       setTimeout(() => {
-        setRevealed((prev) => new Set([...prev, idx]));
+        setRevealed((prev) => new Set(Array.from(prev).concat(idx)));
       }, order * 18); // 18ms per square × 64 squares = ~1.15s total
     });
   }, [inView]);
