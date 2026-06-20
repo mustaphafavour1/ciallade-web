@@ -4,15 +4,27 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 
-// All silhouettes share a 0 0 100 130 viewBox; cap uses 0 0 130 90
 const CLOTHES = [
   {
     id: 'shirt',
     label: 'Short-sleeve Shirt',
     viewBox: '0 0 100 130',
     paths: [
-      // neckline (V-curve), right shoulder → sleeve → body, left mirror
       'M 38,14 C 40,7 60,7 62,14 L 75,17 L 94,33 L 87,46 L 78,39 L 78,112 L 22,112 L 22,39 L 13,46 L 6,33 L 25,17 Z',
+      'M 50,8 L 44,28 L 38,14 M 50,8 L 56,28 L 62,14',
+      'M 47,34 L 53,34 M 47,48 L 53,48 M 47,62 L 53,62',
+      'M 32,44 L 48,44 L 48,56 L 32,56',
+    ],
+  },
+  {
+    id: 'longsleeve',
+    label: 'Long-sleeve Shirt',
+    viewBox: '0 0 100 130',
+    paths: [
+      'M 38,14 C 40,7 60,7 62,14 L 76,18 L 97,60 L 90,67 L 78,52 L 78,112 L 22,112 L 22,52 L 10,67 L 3,60 L 24,18 Z',
+      'M 50,8 L 44,28 L 38,14 M 50,8 L 56,28 L 62,14',
+      'M 47,34 L 53,34 M 47,48 L 53,48 M 47,62 L 53,62',
+      'M 90,65 L 78,51 M 10,65 L 22,51',
     ],
   },
   {
@@ -20,8 +32,10 @@ const CLOTHES = [
     label: 'Trousers',
     viewBox: '0 0 80 145',
     paths: [
-      // waistband → seat curves → two legs → crotch point
       'M 14,6 L 66,6 Q 70,32 65,56 L 60,138 L 46,138 L 43,70 Q 42,67 40,66 Q 38,67 37,70 L 34,138 L 20,138 L 15,56 Q 10,32 14,12 Z',
+      'M 14,6 L 66,6 L 66,20 L 14,20',
+      'M 22,6 L 22,20 M 40,6 L 40,20 M 58,6 L 58,20',
+      'M 53,56 L 56,138 M 27,56 L 24,138',
     ],
   },
   {
@@ -29,19 +43,10 @@ const CLOTHES = [
     label: 'Roundneck',
     viewBox: '0 0 100 130',
     paths: [
-      // round neck, wider short sleeves
       'M 40,13 Q 50,5 60,13 L 74,17 L 89,30 L 82,44 L 74,38 L 74,112 L 26,112 L 26,38 L 18,44 L 11,30 L 26,17 Z',
-    ],
-  },
-  {
-    id: 'cap',
-    label: 'Cap',
-    viewBox: '0 0 130 90',
-    paths: [
-      // crown dome + band
-      'M 12,64 Q 10,20 58,12 Q 106,20 104,64 L 104,72 Q 58,70 12,72 Z',
-      // brim
-      'M 12,72 Q 58,69 110,76 Q 110,86 100,82 L 104,72',
+      'M 40,13 Q 50,22 60,13',
+      'M 26,38 L 18,44 M 74,38 L 82,44',
+      'M 42,60 L 42,76 L 58,76 L 58,60',
     ],
   },
   {
@@ -49,8 +54,10 @@ const CLOTHES = [
     label: 'Jacket',
     viewBox: '0 0 100 132',
     paths: [
-      // lapels (V opens to chest), longer body than shirt
       'M 40,10 Q 44,19 50,28 Q 56,19 60,10 L 76,14 L 95,28 L 88,42 L 78,36 L 78,122 L 22,122 L 22,36 L 12,42 L 5,28 L 24,14 Z',
+      'M 40,10 L 46,30 L 50,28 M 60,10 L 54,30 L 50,28',
+      'M 28,52 L 46,52',
+      'M 24,86 L 48,86 L 48,96 L 24,96 M 52,86 L 76,86 L 76,96 L 52,96',
     ],
   },
   {
@@ -58,15 +65,30 @@ const CLOTHES = [
     label: 'Native Top',
     viewBox: '0 0 120 130',
     paths: [
-      // agbada-style: very wide sleeves, flowing body
       'M 60,8 L 44,12 L 4,22 L 4,56 L 30,48 L 30,120 L 90,120 L 90,48 L 116,56 L 116,22 L 76,12 Z',
-      // front centre slit
       'M 60,10 L 60,74',
+      'M 52,10 L 56,6 L 60,8 L 64,6 L 68,10 L 64,14 L 60,16 L 56,14 Z',
+      'M 4,48 L 30,42 M 116,48 L 90,42 M 30,112 L 90,112',
     ],
   },
 ];
 
-const INTERVAL = 4400;
+const DRAW_DURATION = 4.2;
+const INTERVAL = 8000;
+
+const pathVariants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: (i: number) => ({
+    pathLength: 1,
+    opacity: 1,
+    transition: { duration: DRAW_DURATION, ease: 'easeInOut' as const, delay: i * 0.5 },
+  }),
+  exit: {
+    pathLength: 0,
+    opacity: 0,
+    transition: { duration: 1.4, ease: 'easeIn' as const },
+  },
+};
 
 function ClothingCycle() {
   const [idx, setIdx] = useState(0);
@@ -80,20 +102,17 @@ function ClothingCycle() {
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
-      <div
-        className="w-[170px] md:w-[200px]"
-        style={{ height: 'clamp(200px, 26vh, 300px)' }}
-      >
+      <div style={{ height: '75vh' }}>
         <AnimatePresence mode="wait">
           <motion.svg
             key={item.id}
             viewBox={item.viewBox}
-            className="w-full h-full"
+            style={{ height: '100%', width: 'auto' }}
             preserveAspectRatio="xMidYMid meet"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.2 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.55, ease: 'easeInOut' }}
+            exit={{ opacity: 0, transition: { delay: 1.3, duration: 0.1 } }}
+            transition={{ duration: 0.4 }}
           >
             {item.paths.map((d, i) => (
               <motion.path
@@ -101,13 +120,15 @@ function ClothingCycle() {
                 d={d}
                 fill="none"
                 stroke="#CE8400"
-                strokeWidth="0.9"
-                strokeDasharray="3 5"
+                strokeWidth="1.2"
+                strokeDasharray="0.1 5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2.5, ease: 'easeInOut', delay: i * 0.5 }}
+                custom={i}
+                variants={pathVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
               />
             ))}
           </motion.svg>
