@@ -4,23 +4,28 @@ import { useRef } from 'react';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { staggerContainer, fadeUp, slideInLeft, slideInRight, reducedVariant } from '@/lib/animations';
 import BYRAPattern from './BYRAPattern';
+import type { SanityFocus } from '@/sanity/lib/fetch';
 
-const AUDIENCE = [
-  {
-    label: 'The Self-Defined',
-    body: '25–45 year-olds who know who they are and want clothes that agree.',
-  },
-  {
-    label: 'The Culturally Rooted',
-    body: 'Those who carry Africa with them and want luxury that does the same.',
-  },
-  {
-    label: 'The Intentional Dresser',
-    body: 'People who choose, never follow. Every piece purchased is a declaration.',
-  },
+const FALLBACK_AUDIENCE = [
+  { label: 'The Self-Defined', body: '25–45 year-olds who know who they are and want clothes that agree.' },
+  { label: 'The Culturally Rooted', body: 'Those who carry Africa with them and want luxury that does the same.' },
+  { label: 'The Intentional Dresser', body: 'People who choose, never follow. Every piece purchased is a declaration.' },
 ];
 
-export default function TheFocus() {
+const FALLBACK_STATS = [
+  { stat: '3', label: 'Flagship Cities' },
+  { stat: '10+', label: 'Annual Drops' },
+  { stat: '50+', label: 'Countries Reached' },
+];
+
+export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
+  const audience = focus?.audience?.length ? focus.audience : FALLBACK_AUDIENCE;
+  const stats = focus?.stats?.length ? focus.stats : FALLBACK_STATS;
+  const visionLabel = focus?.visionLabel ?? '10-Year Vision · 2035';
+  const visionHeadline = focus?.visionHeadline ?? 'The definitive\nAfrican luxury';
+  const visionAccent = focus?.visionAccent ?? 'house.';
+  const visionBody1 = focus?.visionBody1 ?? 'By 2035, Ciallade will be recognized globally as the definitive African luxury fashion house — not a brand that competes with European houses, but one that has built its own category entirely.';
+  const visionBody2 = focus?.visionBody2 ?? 'Rooted in Nigeria. Worn across continents. Belonging to no trend, no season, no movement but its own.';
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const shouldReduce = useReducedMotion();
@@ -62,7 +67,7 @@ export default function TheFocus() {
           animate={inView ? 'visible' : 'hidden'}
           className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 mb-32"
         >
-          {AUDIENCE.map((a, i) => (
+          {audience.map((a, i) => (
             <motion.div
               key={a.label}
               variants={item}
@@ -87,15 +92,15 @@ export default function TheFocus() {
               animate={inView ? 'visible' : 'hidden'}
               transition={{ delay: 0.3 }}
             >
-              <p className="label-text text-xs text-nature-brown mb-6">10-Year Vision · 2035</p>
+              <p className="label-text text-xs text-nature-brown mb-6">{visionLabel}</p>
               <blockquote
                 className="font-display text-almond-cream leading-[0.9]"
                 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)' }}
               >
-                The definitive
-                <br />
-                African luxury{' '}
-                <span className="text-nature-brown">house.</span>
+                {visionHeadline.split('\n').map((line, i) => (
+                  <span key={i}>{line}{i < visionHeadline.split('\n').length - 1 && <br />}</span>
+                ))}{' '}
+                <span className="text-nature-brown">{visionAccent}</span>
               </blockquote>
             </motion.div>
 
@@ -106,26 +111,15 @@ export default function TheFocus() {
               transition={{ delay: 0.45 }}
               className="space-y-6"
             >
-              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">
-                By 2035, Ciallade will be recognized globally as the definitive African luxury fashion
-                house — not a brand that competes with European houses, but one that has built its own
-                category entirely.
-              </p>
-              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">
-                Rooted in Nigeria. Worn across continents. Belonging to no trend, no season, no movement
-                but its own.
-              </p>
+              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">{visionBody1}</p>
+              <p className="font-body font-light text-almond-cream/80 text-lg leading-relaxed">{visionBody2}</p>
               <motion.div
                 variants={container}
                 initial="hidden"
                 animate={inView ? 'visible' : 'hidden'}
                 className="grid grid-cols-3 gap-6 pt-4"
               >
-                {[
-                  { stat: '3', label: 'Flagship Cities' },
-                  { stat: '10+', label: 'Annual Drops' },
-                  { stat: '50+', label: 'Countries Reached' },
-                ].map((s) => (
+                {stats.map((s) => (
                   <motion.div key={s.label} variants={item}>
                     <p className="font-display text-nature-brown text-6xl leading-none mb-1">{s.stat}</p>
                     <p className="label-text text-[10px] text-almond-cream/60">{s.label}</p>

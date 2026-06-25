@@ -4,14 +4,17 @@ import { useRef } from 'react';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { staggerContainer, fadeUp, reducedVariant } from '@/lib/animations';
 
-const DIFF = [
-  { contrast: 'Mass-produced. Silent. Assumed.', ciallade: 'Crafted with deliberate intention.', sym: '⊙' },
-  { contrast: 'European luxury as the standard.', ciallade: 'African luxury, on its own terms.', sym: '◈' },
-  { contrast: 'Fashion as trend. Follow or fade.', ciallade: 'Fashion as language. You are what you wear.', sym: '∿' },
-  { contrast: 'Fitting into the mold.', ciallade: 'Defining your own silhouette.', sym: '⊕' },
+type DiffItem = { symbol: string; ciallade: string; contrast: string };
+
+const FALLBACK: DiffItem[] = [
+  { symbol: '⊙', ciallade: 'Crafted with deliberate intention.', contrast: 'Mass-produced. Silent. Assumed.' },
+  { symbol: '◈', ciallade: 'African luxury, on its own terms.', contrast: 'European luxury as the standard.' },
+  { symbol: '∿', ciallade: 'Fashion as language. You are what you wear.', contrast: 'Fashion as trend. Follow or fade.' },
+  { symbol: '⊕', ciallade: 'Defining your own silhouette.', contrast: 'Fitting into the mold.' },
 ];
 
-export default function TheDifference() {
+export default function TheDifference({ items }: { items?: DiffItem[] | null }) {
+  const diff = items?.length ? items : FALLBACK;
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const shouldReduce = useReducedMotion();
@@ -46,13 +49,13 @@ export default function TheDifference() {
           animate={inView ? 'visible' : 'hidden'}
           className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12"
         >
-          {DIFF.map((d, i) => (
+          {diff.map((d, i) => (
             <motion.div
               key={i}
               variants={item}
               transition={{ delay: i * 0.08 }}
             >
-              <span className="block font-display text-nature-brown/30 text-2xl mb-3" aria-hidden>{d.sym}</span>
+              <span className="block font-display text-nature-brown/30 text-2xl mb-3" aria-hidden>{d.symbol}</span>
               <p className="font-body text-almond-cream/90 text-base md:text-lg leading-snug font-medium">
                 {d.ciallade}
               </p>
@@ -79,7 +82,7 @@ export default function TheDifference() {
           animate={inView ? 'visible' : 'hidden'}
           className="grid grid-cols-2 md:grid-cols-4 gap-8"
         >
-          {DIFF.map((d, i) => (
+          {diff.map((d, i) => (
             <motion.div
               key={i}
               variants={item}

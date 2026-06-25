@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { featuredProducts, formatPrice } from '@/data/products';
+import type { SanityProduct } from '@/sanity/lib/fetch';
 
 const CYCLE_MS = 4500;
 
@@ -25,18 +26,28 @@ function wedgePath(
   return `M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z`;
 }
 
-export default function FeaturedStrip() {
+type NormalizedProduct = { id: string; slug: string; name: string; price: number; images: string[]; description: string };
+
+function normalizeSanity(p: SanityProduct): NormalizedProduct {
+  return { id: p._id, slug: p.slug, name: p.name, price: p.price, images: p.images ?? [], description: p.description };
+}
+
+export default function FeaturedStrip({ products }: { products?: SanityProduct[] | null }) {
+  const items: NormalizedProduct[] = products?.length
+    ? products.map(normalizeSanity)
+    : featuredProducts.map((p) => ({ id: p.id, slug: p.slug, name: p.name, price: p.price, images: p.images, description: p.description }));
+
   const [activeIdx, setActiveIdx] = useState(0);
 
   useEffect(() => {
     const id = setInterval(
-      () => setActiveIdx((i) => (i + 1) % featuredProducts.length),
+      () => setActiveIdx((i) => (i + 1) % items.length),
       CYCLE_MS
     );
     return () => clearInterval(id);
-  }, []);
+  }, [items.length]);
 
-  const active = featuredProducts[activeIdx];
+  const active = items[activeIdx];
 
   return (
     <section
@@ -86,13 +97,13 @@ export default function FeaturedStrip() {
             aria-hidden="true"
           >
             <defs>
-              {featuredProducts.map((_, i) => (
+              {items.map((_, i) => (
                 <clipPath key={i} id={`mobile-clip-${i}`}>
                   <path d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)} />
                 </clipPath>
               ))}
             </defs>
-            {featuredProducts.map((product, i) => {
+            {items.map((product, i) => {
               const isActive = i === activeIdx;
               return (
                 <g key={product.id} onClick={() => setActiveIdx(i)} style={{ cursor: 'pointer' }}>
@@ -128,9 +139,9 @@ export default function FeaturedStrip() {
 
         {/* Mobile thumbnail row */}
         <div className="flex gap-3 justify-center py-4 flex-none">
-          {featuredProducts.map((p, i) => (
+          {items.map((p, i) => (
             <button
-              key={p.id}
+              key={p.id ?? i}
               onClick={() => setActiveIdx(i)}
               aria-label={`View ${p.name}`}
               className="relative rounded-full overflow-hidden flex-none transition-all duration-300"
@@ -216,13 +227,13 @@ export default function FeaturedStrip() {
               role="img"
             >
               <defs>
-                {featuredProducts.map((_, i) => (
+                {items.map((_, i) => (
                   <clipPath key={i} id={`small-clip-${i}`}>
                     <path d={wedgePath(100, 100, 85, i * 60, (i + 1) * 60)} />
                   </clipPath>
                 ))}
               </defs>
-              {featuredProducts.map((product, i) => (
+              {items.map((product, i) => (
                 <g key={product.id}>
                   <image
                     href={product.images[0]}
@@ -258,13 +269,13 @@ export default function FeaturedStrip() {
             aria-hidden="true"
           >
             <defs>
-              {featuredProducts.map((_, i) => (
+              {items.map((_, i) => (
                 <clipPath key={i} id={`large-clip-${i}`}>
                   <path d={wedgePath(300, 300, 290, i * 60, (i + 1) * 60)} />
                 </clipPath>
               ))}
             </defs>
-            {featuredProducts.map((product, i) => {
+            {items.map((product, i) => {
               const isActive = i === activeIdx;
               return (
                 <g key={product.id}>

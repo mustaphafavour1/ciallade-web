@@ -3,8 +3,9 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
+import type { SanityPhilosophy } from '@/sanity/lib/fetch';
 
-const PHILOSOPHY_TEXT = `Ciallade exists at the intersection of identity and craft.
+const DEFAULT_PHILOSOPHY_TEXT = `Ciallade exists at the intersection of identity and craft.
 
 We believe clothing is not decoration — it is declaration. Every silhouette we design begins not with a sketch but with a question: who is this person, and what do they need the world to know about them?
 
@@ -16,7 +17,13 @@ We are not competing with the houses of Milan or Paris. We are building somethin
 
 Ciallade is for those who already know who they are — and simply need clothing that agrees.`;
 
-export default function BrandPhilosophy() {
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80';
+
+export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhilosophy | null }) {
+  const philosophyText = philosophy?.philosophyText ?? DEFAULT_PHILOSOPHY_TEXT;
+  const imageUrl = philosophy?.imageUrl ?? DEFAULT_IMAGE;
+  const sectionLabel = philosophy?.sectionLabel ?? 'Our Foundation';
+  const title = philosophy?.title ?? 'The philosophy\nbehind every stitch.';
   const outerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -35,9 +42,11 @@ export default function BrandPhilosophy() {
     <>
       {/* Section title + subtitle above sticky container */}
       <div className="bg-dark-wood px-8 md:px-14 lg:px-16 pt-40 pb-16">
-        <p className="label-text text-xs text-nature-brown tracking-widest mb-4">Our Foundation</p>
+        <p className="label-text text-xs text-nature-brown tracking-widest mb-4">{sectionLabel}</p>
         <h2 className="font-display text-almond-cream leading-tight" style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}>
-          The philosophy<br />behind every stitch.
+          {title.split('\n').map((line, i) => (
+            <span key={i}>{line}{i < title.split('\n').length - 1 && <br />}</span>
+          ))}
         </h2>
       </div>
 
@@ -50,7 +59,7 @@ export default function BrandPhilosophy() {
             {/* Left half: editorial image, fills full height */}
             <div className="relative min-h-[45vh] lg:min-h-0" style={{ borderRight: '3px solid #CE8400' }}>
               <Image
-                src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80"
+                src={imageUrl}
                 alt="Ciallade brand editorial — warm tones, structured silhouette"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -87,7 +96,7 @@ export default function BrandPhilosophy() {
                     userSelect: 'none',
                   }}
                 >
-                  {PHILOSOPHY_TEXT}
+                  {philosophyText}
                 </p>
 
                 {/* Filled layer — clips from top to bottom as you scroll */}
@@ -100,7 +109,7 @@ export default function BrandPhilosophy() {
                     pointerEvents: 'none',
                   }}
                 >
-                  {PHILOSOPHY_TEXT}
+                  {philosophyText}
                 </motion.p>
               </div>
 

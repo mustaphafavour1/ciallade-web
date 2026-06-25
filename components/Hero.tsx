@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
+import type { SanityHero } from '@/sanity/lib/fetch';
 
 const CLOTHES = [
   {
@@ -162,8 +163,15 @@ function ClothingCycle() {
   );
 }
 
-export default function Hero() {
+export default function Hero({ heroData }: { heroData?: SanityHero | null }) {
   const shouldReduce = useReducedMotion();
+  const seasonBadge = heroData?.seasonBadge ?? 'NEW COLLECTION · SS 2026';
+  const headlineLeft = heroData?.headlineLeft ?? 'Be';
+  const headlineLeftAccent = heroData?.headlineLeftAccent ?? 'Yourself.';
+  const headlineRight = heroData?.headlineRight ?? 'Reinvent';
+  const headlineRightAccent = heroData?.headlineRightAccent ?? 'Always.';
+  const subtitle = heroData?.subtitle ?? 'A luxury Nigerian fashion brand\ncrafted for those who define themselves.';
+  const ctaText = heroData?.ctaText ?? "Explore Ciallade's Collection";
 
   return (
     <section
@@ -201,13 +209,13 @@ export default function Hero() {
         transition={{ delay: 0.85, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
         <p className="label-text text-[10px] text-nature-brown tracking-widest mb-2">
-          NEW COLLECTION · SS 2026
+          {seasonBadge}
         </p>
         <h2
           className="font-display text-almond-cream/90 leading-[0.92]"
           style={{ fontSize: 'clamp(39px, 4.8vw, 75px)' }}
         >
-          Be <span className="text-nature-brown">Yourself.</span>
+          {headlineLeft} <span className="text-nature-brown">{headlineLeftAccent}</span>
         </h2>
       </motion.div>
 
@@ -220,9 +228,9 @@ export default function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.15, duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
         >
-          Reinvent
+          {headlineRight}
           <br />
-          <span className="text-nature-brown">Always.</span>
+          <span className="text-nature-brown">{headlineRightAccent}</span>
         </motion.h1>
       </div>
 
@@ -235,9 +243,9 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            A luxury Nigerian fashion brand
-            <br />
-            crafted for those who define themselves.
+            {subtitle.split('\n').map((line, i) => (
+              <span key={i}>{line}{i < subtitle.split('\n').length - 1 && <br />}</span>
+            ))}
           </motion.p>
 
           <motion.div
@@ -250,7 +258,7 @@ export default function Hero() {
               href="/collections"
               className="inline-block border border-nature-brown text-nature-brown label-text text-[10px] px-8 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
             >
-              Explore Ciallade&apos;s Collection
+              {ctaText}
             </Link>
           </motion.div>
         </div>

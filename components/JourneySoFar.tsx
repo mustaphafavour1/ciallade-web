@@ -2,41 +2,21 @@
 
 import { useRef, useState } from 'react';
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
+import type { SanityMilestone } from '@/sanity/lib/fetch';
 
-const MILESTONES = [
-  {
-    year: '2020',
-    title: 'The Conviction',
-    desc: 'Founded in Lagos on a single belief: African luxury on its own terms, borrowing nothing from anywhere.',
-  },
-  {
-    year: '2021',
-    title: 'First Stitch',
-    desc: 'The inaugural collection — 12 pieces, each one a vocabulary word in a new fashion language.',
-  },
-  {
-    year: '2022',
-    title: 'The Atelier',
-    desc: 'Our Lagos studio opened. A space where every pattern is deliberate and every cut is a sentence.',
-  },
-  {
-    year: '2023',
-    title: 'Beyond Borders',
-    desc: 'First international stockists. Ciallade began speaking to the world from its own ground.',
-  },
-  {
-    year: '2024',
-    title: 'Digital Flagship',
-    desc: 'Launched online. A luxury experience now accessible globally, permanently rooted locally.',
-  },
-  {
-    year: '2026',
-    title: 'SS 2026 Campaign',
-    desc: 'Define the moment. Own the frame. A new vocabulary for a new season.',
-  },
+const FALLBACK_MILESTONES: SanityMilestone[] = [
+  { _id: '1', year: '2020', title: 'The Conviction', body: 'Founded in Lagos on a single belief: African luxury on its own terms, borrowing nothing from anywhere.' },
+  { _id: '2', year: '2021', title: 'First Stitch', body: 'The inaugural collection — 12 pieces, each one a vocabulary word in a new fashion language.' },
+  { _id: '3', year: '2022', title: 'The Atelier', body: 'Our Lagos studio opened. A space where every pattern is deliberate and every cut is a sentence.' },
+  { _id: '4', year: '2023', title: 'Beyond Borders', body: 'First international stockists. Ciallade began speaking to the world from its own ground.' },
+  { _id: '5', year: '2024', title: 'Digital Flagship', body: 'Launched online. A luxury experience now accessible globally, permanently rooted locally.' },
+  { _id: '6', year: '2026', title: 'SS 2026 Campaign', body: 'Define the moment. Own the frame. A new vocabulary for a new season.' },
 ];
 
-export default function JourneySoFar() {
+export default function JourneySoFar({ milestones }: { milestones?: SanityMilestone[] | null }) {
+  const data = milestones?.length ? milestones : FALLBACK_MILESTONES;
+  const frameCount = Math.max(1, Math.ceil(data.length / 2));
+
   const outerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: outerRef,
@@ -45,13 +25,11 @@ export default function JourneySoFar() {
 
   const [frame, setFrame] = useState(0);
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    // 3 frames over scroll 0→1, last frame at 0.67→1
-    setFrame(Math.min(2, Math.floor(v * 3)));
+    setFrame(Math.min(frameCount - 1, Math.floor(v * frameCount)));
   });
 
-  // The two milestones for this frame
-  const m0 = MILESTONES[frame * 2];
-  const m1 = MILESTONES[frame * 2 + 1];
+  const m0 = data[frame * 2];
+  const m1 = data[frame * 2 + 1];
 
   return (
     <div ref={outerRef} className="relative" style={{ minHeight: '400vh' }}>
@@ -99,7 +77,7 @@ export default function JourneySoFar() {
                     {m.title}
                   </h3>
                   <p className="font-body font-light text-dark-wood/60 text-base md:text-lg leading-relaxed max-w-lg">
-                    {m.desc}
+                    {m.body}
                   </p>
                 </div>
               </div>
@@ -109,7 +87,7 @@ export default function JourneySoFar() {
 
         {/* Scroll progress indicator */}
         <div className="absolute bottom-8 left-8 md:left-16 flex gap-2 items-center">
-          {[0, 1, 2].map((f) => (
+          {Array.from({ length: frameCount }, (_, f) => (
             <div
               key={f}
               className="h-px transition-all duration-500"

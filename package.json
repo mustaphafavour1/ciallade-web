@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@sanity/image-url": "^1.2.0",
+    "@sanity/vision": "^3.99.0",
     "framer-motion": "^12.40.0",
     "next": "14.2.35",
+    "next-sanity": "^7.1.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "sanity": "^3.99.0"
   },
   "devDependencies": {
     "@types/node": "^20",

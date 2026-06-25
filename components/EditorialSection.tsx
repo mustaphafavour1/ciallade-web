@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
+import type { SanityEditorial } from '@/sanity/lib/fetch';
 
 const COLS = 8;
 const ROWS = 8;
@@ -19,7 +20,14 @@ function buildRevealOrder(): number[] {
 }
 const REVEAL_ORDER = buildRevealOrder();
 
-export default function EditorialSection() {
+export default function EditorialSection({ editorial }: { editorial?: SanityEditorial | null }) {
+  const sectionLabel = editorial?.sectionLabel ?? 'SS 2026 Campaign';
+  const headline = editorial?.headline ?? 'Define the moment.';
+  const subheadline = editorial?.subheadline ?? 'Own the frame.';
+  const imageUrl = editorial?.imageUrl ?? 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&h=800&q=80';
+  const ctaText = editorial?.ctaText ?? 'Explore the Campaign';
+  const ctaLink = editorial?.ctaLink ?? '/collections';
+
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
@@ -139,7 +147,7 @@ export default function EditorialSection() {
           transition={{ duration: 0.6 }}
           className="label-text text-xs text-nature-brown mb-6"
         >
-          SS 2026 Campaign
+          {sectionLabel}
         </motion.p>
 
         <motion.h2
@@ -148,8 +156,8 @@ export default function EditorialSection() {
           transition={{ delay: 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="font-display text-almond-cream text-4xl md:text-6xl lg:text-7xl text-center leading-tight mb-16 max-w-2xl"
         >
-          Define the moment.<br />
-          <span className="text-nature-brown">Own the frame.</span>
+          {headline}<br />
+          <span className="text-nature-brown">{subheadline}</span>
         </motion.h2>
 
         {/* Square image with sniper frame */}
@@ -163,8 +171,8 @@ export default function EditorialSection() {
           >
             {/* Background image (always mounted) */}
             <Image
-              src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&h=800&q=80"
-              alt="Ciallade SS 2026 editorial campaign"
+              src={imageUrl}
+              alt="Ciallade editorial campaign"
               fill
               className="object-cover"
               sizes="(min-width: 600px) 600px, 100vw"
@@ -192,13 +200,13 @@ export default function EditorialSection() {
         </div>
 
         <motion.a
-          href="/collections"
+          href={ctaLink}
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 1.8, duration: 0.6 }}
           className="mt-16 inline-block border border-nature-brown text-nature-brown font-body label-text text-xs px-10 py-4 hover:bg-nature-brown hover:text-dark-wood transition-all duration-300"
         >
-          Explore the Campaign
+          {ctaText}
         </motion.a>
       </div>
     </section>

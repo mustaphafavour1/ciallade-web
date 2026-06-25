@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { SanityCollection } from '@/sanity/lib/fetch';
 
 const UNS = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
@@ -52,18 +53,22 @@ const SCATTER: { top: string; left: string; transform?: string }[] = [
 
 const CYCLE_MS = 3000;
 
-export default function CollectionsGrid() {
+export default function CollectionsGrid({ collections }: { collections?: SanityCollection[] | null }) {
+  const cats = collections?.length
+    ? collections.map((c) => ({ label: c.label, slug: c.slug, image: c.imageUrl }))
+    : categories;
+
   const [activeIdx, setActiveIdx] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayIdx = hoveredIdx !== null ? hoveredIdx : activeIdx;
 
   useEffect(() => {
     const id = setInterval(
-      () => setActiveIdx((i) => (i + 1) % categories.length),
+      () => setActiveIdx((i) => (i + 1) % cats.length),
       CYCLE_MS
     );
     return () => clearInterval(id);
-  }, []);
+  }, [cats.length]);
 
   return (
     <section className="bg-dark-wood py-40 px-6 md:px-12 relative min-h-[70vh]">
@@ -77,7 +82,7 @@ export default function CollectionsGrid() {
 
       {/* ── Mobile: simple vertical list ── */}
       <div className="flex flex-col gap-6 md:hidden">
-        {categories.map((cat, i) => {
+        {cats.map((cat, i) => {
           const isActive = i === displayIdx;
           return (
             <Link key={cat.slug} href={`/collections?category=${cat.slug}`}>
@@ -117,7 +122,7 @@ export default function CollectionsGrid() {
 
       {/* ── Desktop: scattered absolute layout ── */}
       <div className="hidden md:block relative" style={{ minHeight: '85vh' }}>
-        {categories.map((cat, i) => {
+        {cats.map((cat, i) => {
           const isActive = i === displayIdx;
           const pos = SCATTER[i];
           return (
