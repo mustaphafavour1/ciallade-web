@@ -8,6 +8,7 @@ import Testimonials from '@/components/Testimonials';
 import JourneySoFar from '@/components/JourneySoFar';
 import TheDifference from '@/components/TheDifference';
 import TheFocus from '@/components/TheFocus';
+import FooterRibbon from '@/components/FooterRibbon';
 import {
   fetchHero, fetchFeaturedProducts, fetchPhilosophy, fetchCollections,
   fetchEditorial, fetchTestimonials, fetchMilestones, fetchDifference, fetchFocus,
@@ -43,6 +44,7 @@ export default async function HomePage() {
       <JourneySoFar milestones={milestones} />
       <TheDifference items={difference?.items} />
       <TheFocus focus={focus} />
+      <FooterRibbon />
     </>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { staggerContainer, fadeUp, slideInLeft, slideInRight, reducedVariant } from '@/lib/animations';
+import { useRef, useState, useEffect } from 'react';
+import { motion, useInView, useReducedMotion, animate } from 'framer-motion';
+import { staggerContainer, fadeUp, slideInRight, reducedVariant } from '@/lib/animations';
+import SectionHeading, { type Segment } from '@/components/SectionHeading';
 import BYRAPattern from './BYRAPattern';
 import type { SanityFocus } from '@/sanity/lib/fetch';
 
@@ -18,6 +19,43 @@ const FALLBACK_STATS = [
   { stat: '50+', label: 'Countries Reached' },
 ];
 
+/**
+ * The reserved primitive for this section: an odometer count-up on the vision
+ * stats. Distinct from JourneySoFar's rolling-digit reel — this is a smooth
+ * whole-number tween that parses the leading integer and keeps any suffix ("+").
+ */
+function CountUpStat({ value }: { value: string }) {
+  const reduce = useReducedMotion() ?? false;
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const match = value.match(/^(\d+)(.*)$/);
+  const isNumeric = !!match;
+  const target = match ? Number.parseInt(match[1], 10) : 0;
+  const suffix = match ? match[2] : '';
+  const [display, setDisplay] = useState(reduce ? target : 0);
+
+  useEffect(() => {
+    if (!isNumeric) return;
+    if (reduce) {
+      setDisplay(target);
+      return;
+    }
+    if (!inView) return;
+    const controls = animate(0, target, {
+      duration: 1.6,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, reduce, target, isNumeric]);
+
+  return (
+    <span ref={ref} style={{ fontVariantNumeric: 'tabular-nums' }}>
+      {isNumeric ? `${display}${suffix}` : value}
+    </span>
+  );
+}
+
 export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
   const audience = focus?.audience?.length ? focus.audience : FALLBACK_AUDIENCE;
   const stats = focus?.stats?.length ? focus.stats : FALLBACK_STATS;
@@ -31,78 +69,70 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
   const shouldReduce = useReducedMotion();
   const container = shouldReduce ? {} : staggerContainer;
   const item = shouldReduce ? reducedVariant : fadeUp;
-  const left = shouldReduce ? reducedVariant : slideInLeft;
   const right = shouldReduce ? reducedVariant : slideInRight;
+
+  // Vision headline routed through SectionHeading; gold accent on the last line.
+  const headlineParts = visionHeadline.split('\n');
+  const visionLines: Segment[][] = headlineParts.map((line, i) =>
+    i === headlineParts.length - 1
+      ? [{ text: line + ' ' }, { text: visionAccent, accent: true }]
+      : [{ text: line }]
+  );
 
   return (
     <section ref={ref} className="relative bg-almond-cream overflow-hidden">
       <BYRAPattern color="#1C1004" opacity={0.03} animated={false} />
 
       <div className="relative z-10">
-        {/* Top label */}
+        {/* Section title */}
         <div className="px-6 md:px-12 pt-48 pb-16">
-          <motion.p
-            variants={item}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            className="label-text text-xs text-coffee-brown mb-4"
-          >
-            Who We&apos;re For
-          </motion.p>
-          <motion.h2
-            variants={item}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            transition={{ delay: 0.08 }}
-            className="font-display text-dark-wood text-4xl md:text-5xl leading-tight"
-          >
-            The Focus
-          </motion.h2>
+          <SectionHeading
+            eyebrow="Who We're For"
+            lines={[[{ text: 'The ' }, { text: 'Focus', accent: true }]]}
+            className="text-dark-wood text-4xl md:text-5xl"
+            align="left"
+            as="h2"
+          />
         </div>
 
-        {/* Audience cards */}
+        {/* Audience cards — dashed divider, elevated spacing/type */}
         <motion.div
           variants={container}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 mb-32"
+          className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-32"
         >
           {audience.map((a, i) => (
             <motion.div
               key={a.label}
               variants={item}
               transition={{ delay: i * 0.1 }}
-              style={{ borderTop: '1px dashed rgba(28,16,4,0.25)', paddingTop: '2rem' }}
+              style={{ borderTop: '1px dashed rgba(28,16,4,0.28)', paddingTop: '2.25rem' }}
             >
-              <div className="w-6 h-px bg-nature-brown mb-5" />
-              <h3 className="font-display text-dark-wood text-3xl font-bold mb-3 leading-tight">{a.label}</h3>
-              <p className="font-body font-light text-dark-wood/60 text-base leading-relaxed">{a.body}</p>
+              <div className="flex items-center gap-3 mb-6">
+                <span className="label-text text-[11px] text-nature-brown">0{i + 1}</span>
+                <span className="flex-1 h-px bg-nature-brown/25" />
+              </div>
+              <h3 className="font-display text-dark-wood text-3xl md:text-4xl mb-4 leading-[1.05]">{a.label}</h3>
+              <p className="font-body font-light text-dark-wood/65 text-base md:text-lg leading-relaxed">{a.body}</p>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* 10-Year Vision — full bleed dark block */}
-        <div className="relative bg-dark-wood py-40 px-6 md:px-12 overflow-hidden">
+        {/* 10-Year Vision — full-bleed dark block */}
+        <div className="relative bg-dark-wood py-32 md:py-44 px-6 md:px-12 overflow-hidden">
           <BYRAPattern animated={false} />
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              variants={left}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-              transition={{ delay: 0.3 }}
-            >
-              <p className="label-text text-xs text-nature-brown mb-6">{visionLabel}</p>
-              <blockquote
-                className="font-display text-almond-cream leading-[0.9]"
-                style={{ fontSize: 'clamp(42px, 5.5vw, 80px)' }}
-              >
-                {visionHeadline.split('\n').map((line, i) => (
-                  <span key={i}>{line}{i < visionHeadline.split('\n').length - 1 && <br />}</span>
-                ))}{' '}
-                <span className="text-nature-brown">{visionAccent}</span>
-              </blockquote>
-            </motion.div>
+            <div>
+              <SectionHeading
+                eyebrow={visionLabel}
+                lines={visionLines}
+                className="text-almond-cream text-[clamp(42px,5.5vw,80px)]"
+                align="left"
+                as="h2"
+              />
+            </div>
 
             <motion.div
               variants={right}
@@ -121,7 +151,9 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
               >
                 {stats.map((s) => (
                   <motion.div key={s.label} variants={item}>
-                    <p className="font-display text-nature-brown text-6xl leading-none mb-1">{s.stat}</p>
+                    <p className="font-display text-nature-brown text-6xl lg:text-7xl leading-none mb-2">
+                      <CountUpStat value={s.stat} />
+                    </p>
                     <p className="label-text text-[10px] text-almond-cream/60">{s.label}</p>
                   </motion.div>
                 ))}
