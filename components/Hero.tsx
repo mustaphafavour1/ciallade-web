@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
+import SectionHeading from '@/components/SectionHeading';
 import type { SanityHero } from '@/sanity/lib/fetch';
 
 const CLOTHES = [
@@ -201,41 +202,31 @@ export default function Hero({ heroData }: { heroData?: SanityHero | null }) {
       {/* Cycling clothing silhouette — centred, behind all text */}
       {!shouldReduce && <ClothingCycle />}
 
-      {/* "Be Yourself" — top left, appears second */}
-      <motion.div
-        className="absolute top-8 left-8 md:top-12 md:left-12 z-20"
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.85, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className="label-text text-[10px] text-nature-brown tracking-widest mb-2">
-          {seasonBadge}
-        </p>
-        <h2
-          className="font-display text-almond-cream/90 leading-[0.92]"
-          style={{ fontSize: 'clamp(39px, 4.8vw, 75px)' }}
-        >
-          {headlineLeft} <span className="text-nature-brown">{headlineLeftAccent}</span>
-        </h2>
-      </motion.div>
+      {/* "Be Yourself." — top left, via the shared headline mechanism */}
+      <div className="absolute top-8 left-6 md:top-12 md:left-12 z-20 max-w-[85vw]">
+        <SectionHeading
+          as="h2"
+          align="left"
+          eyebrow={seasonBadge}
+          lines={[[{ text: `${headlineLeft} ` }, { text: headlineLeftAccent, accent: true }]]}
+          className="text-almond-cream/90 text-[length:clamp(39px,4.8vw,75px)]"
+          delay={0.6}
+        />
+      </div>
 
-      {/* "Reinvent Always" — centre-right, appears first */}
-      <div className="absolute inset-0 z-20 flex items-center justify-end pr-8 md:pr-14 lg:pr-20">
-        <motion.h1
-          className="font-display text-almond-cream leading-[0.88] text-right"
-          style={{ fontSize: 'clamp(46px, 6.5vw, 92px)' }}
-          initial={{ opacity: 0, x: 36 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15, duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {headlineRight}
-          <br />
-          <span className="text-nature-brown">{headlineRightAccent}</span>
-        </motion.h1>
+      {/* "Reinvent Always." — centre-right, via the shared headline mechanism */}
+      <div className="absolute inset-0 z-20 flex items-center justify-end px-6 md:px-12">
+        <SectionHeading
+          as="h1"
+          align="right"
+          lines={[[{ text: headlineRight }], [{ text: headlineRightAccent, accent: true }]]}
+          className="text-almond-cream text-[length:clamp(46px,6.5vw,92px)]"
+          delay={0.15}
+        />
       </div>
 
       {/* Bottom row — stacked on mobile (subtitle above button), side-by-side on desktop */}
-      <div className="absolute bottom-10 left-0 right-0 px-8 md:px-12 z-20">
+      <div className="absolute bottom-10 left-0 right-0 px-6 md:px-12 z-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <motion.p
             className="font-body font-light text-almond-cream/45 text-base leading-relaxed max-w-[240px]"
