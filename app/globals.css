@@ -18,6 +18,9 @@
   --ochre-brown: #CC7722;
   --almond-cream: #FFEBCD;
   --autumn-orange: #FE7017;
+  /* Background-rhythm steps (warm dark editorial) */
+  --near-black: #0D0803;
+  --deep-brown: #150B02;
 }
 
 html {
@@ -44,5 +47,22 @@ body {
     font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
+  }
+  .bg-near-black {
+    background-color: var(--near-black);
+  }
+  .bg-deep-brown {
+    background-color: var(--deep-brown);
+  }
+  /* Barely-there grain/vignette wash for premium depth on dark sections */
+  .wash-dark {
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(206, 132, 0, 0.05) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 100%, rgba(117, 73, 43, 0.07) 0%, transparent 45%);
+  }
+  .wash-light {
+    background-image:
+      radial-gradient(ellipse at 85% 0%, rgba(206, 132, 0, 0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 10% 100%, rgba(124, 28, 18, 0.04) 0%, transparent 45%);
   }
 }
