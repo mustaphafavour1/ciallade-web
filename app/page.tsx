@@ -10,41 +10,39 @@ import TheDifference from '@/components/TheDifference';
 import TheFocus from '@/components/TheFocus';
 import FooterRibbon from '@/components/FooterRibbon';
 import {
-  fetchHero, fetchFeaturedProducts, fetchPhilosophy, fetchCollections,
-  fetchEditorial, fetchTestimonials, fetchMilestones, fetchDifference, fetchFocus,
+  fetchSiteContent,
+  fetchFeaturedPieces,
+  fetchCollections,
+  fetchTestimonials,
+  fetchMilestones,
 } from '@/sanity/lib/fetch';
 
 const IntroScreen = dynamic(() => import('@/components/IntroScreen'), { ssr: false });
 
-export const revalidate = 60; // Re-fetch Sanity data at most every 60 seconds
+export const revalidate = 60; // Re-fetch Sanity content at most once a minute
 
 export default async function HomePage() {
-  const [hero, featured, philosophy, collections, editorial, testimonials, milestones, difference, focus] =
-    await Promise.all([
-      fetchHero(),
-      fetchFeaturedProducts(),
-      fetchPhilosophy(),
-      fetchCollections(),
-      fetchEditorial(),
-      fetchTestimonials(),
-      fetchMilestones(),
-      fetchDifference(),
-      fetchFocus(),
-    ]);
+  const [site, featured, collections, testimonials, milestones] = await Promise.all([
+    fetchSiteContent(),
+    fetchFeaturedPieces(),
+    fetchCollections(),
+    fetchTestimonials(),
+    fetchMilestones(),
+  ]);
 
   return (
     <>
       <IntroScreen />
-      <Hero heroData={hero} />
-      <FeaturedStrip products={featured} />
-      <BrandPhilosophy philosophy={philosophy} />
-      <CollectionsGrid collections={collections} />
-      <EditorialSection editorial={editorial} />
-      <Testimonials testimonials={testimonials} />
-      <JourneySoFar milestones={milestones} />
-      <TheDifference items={difference?.items} />
-      <TheFocus focus={focus} />
-      <FooterRibbon />
+      <Hero heroData={site?.hero} />
+      <FeaturedStrip products={featured} heading={site?.featured} />
+      <BrandPhilosophy philosophy={site?.philosophy} />
+      <CollectionsGrid collections={collections} heading={site?.explore} />
+      <EditorialSection editorial={site?.editorial} />
+      <Testimonials testimonials={testimonials} heading={site?.testimonials} />
+      <JourneySoFar milestones={milestones} heading={site?.journey} />
+      <TheDifference items={site?.difference?.items} heading={site?.difference?.heading} />
+      <TheFocus focus={site?.focus} />
+      <FooterRibbon footer={site?.footer} />
     </>
   );
 }
