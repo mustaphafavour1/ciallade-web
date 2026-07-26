@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { motion, useScroll, useMotionValueEvent, useReducedMotion, AnimatePresence } from 'framer-motion';
-import SectionHeading from '@/components/SectionHeading';
-import type { SanityMilestone } from '@/sanity/lib/fetch';
+import SectionHeading, { toLines } from '@/components/SectionHeading';
+import type { SanityHeading, SanityMilestone } from '@/sanity/lib/fetch';
 
 const FALLBACK_MILESTONES: SanityMilestone[] = [
   { _id: '1', year: '2020', title: 'The Conviction', body: 'Founded in Lagos on a single belief: African luxury on its own terms, borrowing nothing from anywhere.' },
@@ -67,7 +67,13 @@ function OdometerYear({ year }: { year: string }) {
   );
 }
 
-export default function JourneySoFar({ milestones }: { milestones?: SanityMilestone[] | null }) {
+export default function JourneySoFar({
+  milestones,
+  heading,
+}: {
+  milestones?: SanityMilestone[] | null;
+  heading?: SanityHeading | null;
+}) {
   const data = milestones?.length ? milestones : FALLBACK_MILESTONES;
   const frameCount = Math.max(1, Math.ceil(data.length / 2));
 
@@ -91,8 +97,8 @@ export default function JourneySoFar({ milestones }: { milestones?: SanityMilest
         {/* Header */}
         <div className="px-6 md:px-12 pt-20 md:pt-24 pb-0">
           <SectionHeading
-            eyebrow="Since 2020"
-            lines={[[{ text: 'The Journey So ' }, { text: 'Far', accent: true }]]}
+            eyebrow={heading?.eyebrow ?? 'Since 2020'}
+            lines={toLines(heading?.title, heading?.titleAccent, 'The Journey So', 'Far')}
             className="text-almond-cream text-4xl md:text-6xl"
             align="left"
             as="h2"

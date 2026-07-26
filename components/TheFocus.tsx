@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, useReducedMotion, animate } from 'framer-motion';
 import { staggerContainer, fadeUp, slideInRight, reducedVariant } from '@/lib/animations';
-import SectionHeading, { type Segment } from '@/components/SectionHeading';
+import SectionHeading, { toLines, type Segment } from '@/components/SectionHeading';
 import BYRAPattern from './BYRAPattern';
 import type { SanityFocus } from '@/sanity/lib/fetch';
 
@@ -64,6 +64,11 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
   const visionAccent = focus?.visionAccent ?? 'house.';
   const visionBody1 = focus?.visionBody1 ?? 'By 2035, Ciallade will be recognized globally as the definitive African luxury fashion house — not a brand that competes with European houses, but one that has built its own category entirely.';
   const visionBody2 = focus?.visionBody2 ?? 'Rooted in Nigeria. Worn across continents. Belonging to no trend, no season, no movement but its own.';
+
+  // Section heading, CMS-driven with the original copy as fallback.
+  const headingEyebrow = focus?.heading?.eyebrow?.trim() || "Who We're For";
+  const headingLines = toLines(focus?.heading?.title, focus?.heading?.titleAccent, 'The', 'Focus');
+
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const shouldReduce = useReducedMotion();
@@ -87,8 +92,8 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
         {/* Section title */}
         <div className="px-6 md:px-12 pt-48 pb-16">
           <SectionHeading
-            eyebrow="Who We're For"
-            lines={[[{ text: 'The ' }, { text: 'Focus', accent: true }]]}
+            eyebrow={headingEyebrow}
+            lines={headingLines}
             className="text-dark-wood text-4xl md:text-5xl"
             align="left"
             as="h2"

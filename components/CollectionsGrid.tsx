@@ -5,8 +5,8 @@ import { useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import SectionHeading from '@/components/SectionHeading';
-import type { SanityCollection } from '@/sanity/lib/fetch';
+import SectionHeading, { toLines } from '@/components/SectionHeading';
+import type { SanityCollection, SanityHeading } from '@/sanity/lib/fetch';
 
 const UNS = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
@@ -42,9 +42,23 @@ const categories = [
 const CYCLE_MS = 3000;
 const EASE = 'cubic-bezier(0.22,1,0.36,1)';
 
-export default function CollectionsGrid({ collections }: { collections?: SanityCollection[] | null }) {
-  const cats = collections?.length
-    ? collections.map((c) => ({ label: c.label, slug: c.slug, image: c.imageUrl }))
+type Category = { label: string; slug: string; image: string };
+
+export default function CollectionsGrid({
+  collections,
+  heading,
+}: {
+  collections?: SanityCollection[] | null;
+  heading?: SanityHeading | null;
+}) {
+  // CMS collections → the shape the lookbook renders. A collection without an
+  // uploaded image borrows one of the built-in samples so no tile renders blank.
+  const cats: Category[] = collections?.length
+    ? collections.map((c, i) => ({
+        label: c.label,
+        slug: c.slug,
+        image: c.imageUrl || categories[i % categories.length].image,
+      }))
     : categories;
 
   const reduce = useReducedMotion();
@@ -66,8 +80,8 @@ export default function CollectionsGrid({ collections }: { collections?: SanityC
       {/* Header — routed through SectionHeading (dark ink, gold accent) */}
       <div className="mb-12 md:mb-16">
         <SectionHeading
-          eyebrow="Explore"
-          lines={[[{ text: 'Collections', accent: true }]]}
+          eyebrow={heading?.eyebrow ?? 'Explore'}
+          lines={toLines(heading?.title, heading?.titleAccent, '', 'Collections')}
           className="text-dark-wood text-5xl md:text-6xl"
           align="left"
           as="h2"

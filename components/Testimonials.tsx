@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import SectionHeading from '@/components/SectionHeading';
-import type { SanityTestimonial } from '@/sanity/lib/fetch';
+import SectionHeading, { toLines, type Segment } from '@/components/SectionHeading';
+import type { SanityHeading, SanityTestimonial } from '@/sanity/lib/fetch';
 
 const FALLBACK: SanityTestimonial[] = [
   {
@@ -74,9 +74,24 @@ function SideCard({ t, side, reduce }: { t: SanityTestimonial; side: 'left' | 'r
   );
 }
 
-export default function Testimonials({ testimonials }: { testimonials?: SanityTestimonial[] | null }) {
+export default function Testimonials({
+  testimonials,
+  heading,
+}: {
+  testimonials?: SanityTestimonial[] | null;
+  heading?: SanityHeading | null;
+}) {
   const quotes = testimonials?.length ? testimonials : FALLBACK;
   const n = quotes.length;
+
+  // Default headline reads "What our customers say" — toLines can't place text
+  // after the accent word, so the trailing " say" is appended only while the CMS
+  // supplies no headline. Any CMS title/accent then drives the line on its own.
+  const usingCmsHeadline = Boolean(heading?.title?.trim() || heading?.titleAccent?.trim());
+  const built = toLines(heading?.title, heading?.titleAccent, 'What our', 'customers');
+  const headingLines: Segment[][] = usingCmsHeadline
+    ? built
+    : built.map((line, i) => (i === built.length - 1 ? [...line, { text: ' say' }] : line));
   const reduce = useReducedMotion();
   const [activeIdx, setActiveIdx] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -127,10 +142,10 @@ export default function Testimonials({ testimonials }: { testimonials?: SanityTe
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center">
         {/* Centered title, concept surrounds it below */}
         <SectionHeading
-          eyebrow="Worn & Witnessed"
+          eyebrow={heading?.eyebrow ?? 'Worn & Witnessed'}
           align="center"
           as="h2"
-          lines={[[{ text: 'What our ' }, { text: 'customers', accent: true }, { text: ' say' }]]}
+          lines={headingLines}
           className="text-almond-cream text-4xl md:text-6xl mb-16 md:mb-20"
         />
 

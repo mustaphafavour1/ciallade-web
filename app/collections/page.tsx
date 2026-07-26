@@ -1,89 +1,84 @@
-'use client';
+import CollectionsBrowser, { type BrowsePiece, type CategoryTab } from './CollectionsBrowser';
+import { products, type Product } from '@/data/products';
+import { fetchPieces, fetchCollections, type SanityPiece } from '@/sanity/lib/fetch';
 
-import { useState, useRef } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { products, Product } from '@/data/products';
-import { staggerContainer, fadeUp, reducedVariant } from '@/lib/animations';
-import ProductCard from '@/components/ProductCard';
+export const revalidate = 60; // Re-fetch Sanity content at most once a minute
 
-type Category = 'All' | Product['category'];
+/** Category tabs used when Sanity has nothing — the original hardcoded list. */
+const STATIC_CATEGORIES: Product['category'][] = [
+  'Tops',
+  'Bottoms',
+  'Headwear',
+  'Jackets',
+  'Statement Pieces',
+];
 
-const categories: Category[] = ['All', 'Tops', 'Bottoms', 'Headwear', 'Jackets', 'Statement Pieces'];
+/** Must match ALL_SLUG in CollectionsBrowser. */
+const ALL_SLUG = 'all';
 
-export default function CollectionsPage() {
-  const [activeCategory, setActiveCategory] = useState<Category>('All');
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-  const shouldReduce = useReducedMotion();
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
-  const filtered = activeCategory === 'All'
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+function fromSanity(piece: SanityPiece): BrowsePiece {
+  const label = piece.collectionLabel?.trim() || 'Ciallade';
+  return {
+    id: piece._id,
+    slug: piece.slug,
+    name: piece.name,
+    price: piece.price,
+    images: piece.images ?? [],
+    category: label,
+    categorySlug: piece.collectionSlug?.trim() || slugify(label),
+  };
+}
 
-  const containerVariants = shouldReduce ? {} : staggerContainer;
-  const itemVariants = shouldReduce ? reducedVariant : fadeUp;
+function fromStatic(product: Product): BrowsePiece {
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    images: product.images,
+    category: product.category,
+    categorySlug: slugify(product.category),
+  };
+}
 
-  return (
-    <div className="min-h-screen bg-dark-wood pt-28">
-      {/* Header */}
-      <div className="px-6 md:px-12 py-12 border-b border-almond-cream/10">
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="label-text text-xs text-nature-brown mb-4"
-        >
-          Shop All
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display text-almond-cream leading-none"
-          style={{ fontSize: 'clamp(48px, 7vw, 96px)' }}
-        >
-          Collections
-        </motion.h1>
-      </div>
+/** Last-resort tabs: derive them from the pieces when no collection docs exist. */
+function tabsFromPieces(pieces: BrowsePiece[]): CategoryTab[] {
+  const seen: Record<string, true> = {};
+  const tabs: CategoryTab[] = [];
+  for (const piece of pieces) {
+    if (!piece.categorySlug || seen[piece.categorySlug]) continue;
+    seen[piece.categorySlug] = true;
+    tabs.push({ label: piece.category, slug: piece.categorySlug });
+  }
+  return tabs;
+}
 
-      {/* Filter Tabs */}
-      <div className="px-6 md:px-12 py-6 border-b border-almond-cream/10 overflow-x-auto">
-        <div className="flex gap-2 min-w-max">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`label-text text-xs px-5 py-2.5 border transition-all duration-300 whitespace-nowrap ${
-                activeCategory === cat
-                  ? 'bg-nature-brown text-dark-wood border-nature-brown'
-                  : 'border-almond-cream/20 text-almond-cream/60 hover:border-almond-cream/50 hover:text-almond-cream'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
+export default async function CollectionsPage() {
+  const [cmsPieces, cmsCollections] = await Promise.all([fetchPieces(), fetchCollections()]);
 
-      {/* Products Grid */}
-      <div ref={ref} className="px-6 md:px-12 py-12">
-        <p className="font-body font-light text-almond-cream/40 text-sm mb-8">
-          {filtered.length} {filtered.length === 1 ? 'piece' : 'pieces'}
-        </p>
-        <motion.div
-          key={activeCategory}
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12"
-        >
-          {filtered.map((product, i) => (
-            <motion.div key={product.id} variants={itemVariants}>
-              <ProductCard product={product} index={i} />
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </div>
-  );
+  const hasCmsPieces = !!cmsPieces?.length;
+  const pieces: BrowsePiece[] = hasCmsPieces
+    ? cmsPieces.map(fromSanity)
+    : products.map(fromStatic);
+
+  let tabs: CategoryTab[];
+  if (!hasCmsPieces) {
+    tabs = STATIC_CATEGORIES.map((label) => ({ label, slug: slugify(label) }));
+  } else if (cmsCollections?.length) {
+    tabs = cmsCollections.map((c) => ({ label: c.label, slug: c.slug?.trim() || slugify(c.label) }));
+  } else {
+    tabs = tabsFromPieces(pieces);
+  }
+
+  const categories: CategoryTab[] = [{ label: 'All', slug: ALL_SLUG }, ...tabs];
+
+  return <CollectionsBrowser pieces={pieces} categories={categories} />;
 }

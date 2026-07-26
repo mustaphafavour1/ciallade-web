@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import SectionHeading, { type Segment } from '@/components/SectionHeading';
+import SectionHeading, { toLines } from '@/components/SectionHeading';
 import type { SanityPhilosophy } from '@/sanity/lib/fetch';
 
 const DEFAULT_PHILOSOPHY_TEXT = `Ciallade exists at the intersection of identity and craft.
@@ -21,29 +21,30 @@ Ciallade is for those who already know who they are — and simply need clothing
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80';
 
-/**
- * Turn a (possibly multi-line, Sanity-driven) title into SectionHeading lines,
- * inking the final word of the last line as the single gold accent.
- */
-function toHeadingLines(title: string): Segment[][] {
-  const rawLines = title.split('\n').filter((l) => l.trim().length > 0);
-  const lines = rawLines.length ? rawLines : [title];
-  const last = lines.length - 1;
-  return lines.map((line, li) => {
-    if (li !== last) return [{ text: line }];
-    const words = line.split(' ');
-    if (words.length <= 1) return [{ text: line, accent: true }];
-    const lead = words.slice(0, -1).join(' ');
-    const tail = words[words.length - 1];
-    return [{ text: `${lead} ` }, { text: tail, accent: true }];
-  });
-}
-
 export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhilosophy | null }) {
-  const philosophyText = philosophy?.philosophyText ?? DEFAULT_PHILOSOPHY_TEXT;
-  const imageUrl = philosophy?.imageUrl ?? DEFAULT_IMAGE;
-  const sectionLabel = philosophy?.sectionLabel ?? 'Our Foundation';
-  const title = philosophy?.title ?? 'The philosophy\nbehind every stitch.';
+  const philosophyText = philosophy?.philosophyText?.trim() || DEFAULT_PHILOSOPHY_TEXT;
+  const imageUrl = philosophy?.imageUrl?.trim() || DEFAULT_IMAGE;
+  const linkText = philosophy?.linkText?.trim() || 'Our Story';
+  const linkHref = philosophy?.linkHref?.trim() || '/about';
+
+  // Outer section heading (above the sticky container).
+  const eyebrow = philosophy?.heading?.eyebrow?.trim() || 'Our Foundation';
+  const lines = toLines(
+    philosophy?.heading?.title,
+    philosophy?.heading?.titleAccent,
+    'The philosophy\nbehind every',
+    'stitch.'
+  );
+
+  // Inner heading, beside the philosophy text.
+  const innerEyebrow = philosophy?.innerHeading?.eyebrow?.trim() || 'Brand Philosophy';
+  const innerLines = toLines(
+    philosophy?.innerHeading?.title,
+    philosophy?.innerHeading?.titleAccent,
+    'Wear who',
+    'you are.'
+  );
+
   const reduce = useReducedMotion();
   const outerRef = useRef<HTMLDivElement>(null);
 
@@ -71,8 +72,8 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
       {/* Section title above sticky container — routed through SectionHeading */}
       <div className="bg-dark-wood px-6 md:px-12 pt-32 md:pt-44 pb-16">
         <SectionHeading
-          eyebrow={sectionLabel}
-          lines={toHeadingLines(title)}
+          eyebrow={eyebrow}
+          lines={lines}
           className="text-almond-cream text-5xl md:text-6xl lg:text-7xl"
           align="left"
           as="h2"
@@ -124,8 +125,8 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
               style={{ background: '#1C1004' }}
             >
               <SectionHeading
-                eyebrow="Brand Philosophy"
-                lines={[[{ text: 'Wear who ' }, { text: 'you are.', accent: true }]]}
+                eyebrow={innerEyebrow}
+                lines={innerLines}
                 className="text-almond-cream text-3xl md:text-4xl mb-10"
                 align="left"
                 as="h2"
@@ -161,10 +162,10 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
               </div>
 
               <a
-                href="/about"
+                href={linkHref}
                 className="inline-flex items-center gap-2 label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
               >
-                Our Story
+                {linkText}
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>

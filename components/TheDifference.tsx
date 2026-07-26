@@ -3,9 +3,12 @@
 import { useRef } from 'react';
 import { motion, useInView, useReducedMotion, type Variants } from 'framer-motion';
 import { staggerContainer, fadeUp, reducedVariant } from '@/lib/animations';
-import SectionHeading from '@/components/SectionHeading';
+import SectionHeading, { toLines } from '@/components/SectionHeading';
+import type { SanityHeading } from '@/sanity/lib/fetch';
 
 type DiffItem = { symbol: string; ciallade: string; contrast: string };
+/** CMS shape — the glyph is optional there, so it is filled in on normalization. */
+type IncomingDiffItem = { symbol?: string; ciallade: string; contrast: string };
 
 const FALLBACK: DiffItem[] = [
   { symbol: '⊙', ciallade: 'Crafted with deliberate intention.', contrast: 'Mass-produced. Silent. Assumed.' },
@@ -33,8 +36,18 @@ const phraseReduced: Variants = {
   visible: { fontWeight: 600, color: '#CE8400' },
 };
 
-export default function TheDifference({ items }: { items?: DiffItem[] | null }) {
-  const diff = items?.length ? items : FALLBACK;
+export default function TheDifference({
+  items,
+  heading,
+}: {
+  items?: IncomingDiffItem[] | null;
+  heading?: SanityHeading | null;
+}) {
+  // Items without a glyph reuse the built-in one at the same position so the
+  // gold marker above each statement is never missing.
+  const diff: DiffItem[] = items?.length
+    ? items.map((d, i) => ({ ...d, symbol: d.symbol?.trim() || FALLBACK[i % FALLBACK.length].symbol }))
+    : FALLBACK;
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const shouldReduce = useReducedMotion();
@@ -47,8 +60,8 @@ export default function TheDifference({ items }: { items?: DiffItem[] | null }) 
       <div className="relative z-10 px-6 md:px-12">
         <div className="mb-20">
           <SectionHeading
-            eyebrow="Why Ciallade"
-            lines={[[{ text: 'The ' }, { text: 'Difference', accent: true }]]}
+            eyebrow={heading?.eyebrow ?? 'Why Ciallade'}
+            lines={toLines(heading?.title, heading?.titleAccent, 'The', 'Difference')}
             className="text-almond-cream text-4xl md:text-5xl"
             align="left"
             as="h2"

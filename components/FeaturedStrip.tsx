@@ -5,8 +5,8 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { featuredProducts, formatPrice } from '@/data/products';
-import SectionHeading from '@/components/SectionHeading';
-import type { SanityProduct } from '@/sanity/lib/fetch';
+import SectionHeading, { toLines } from '@/components/SectionHeading';
+import type { SanityHeading, SanityPiece } from '@/sanity/lib/fetch';
 
 const CYCLE_MS = 4500;
 // Clip-sweep easing — the ONE animation primitive for this section.
@@ -14,8 +14,16 @@ const SWEEP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 type NormalizedProduct = { id: string; slug: string; name: string; price: number; images: string[]; description: string };
 
-function normalizeSanity(p: SanityProduct): NormalizedProduct {
-  return { id: p._id, slug: p.slug, name: p.name, price: p.price, images: p.images ?? [], description: p.description };
+/** CMS piece → the shape this strip renders. Optional fields get safe defaults. */
+function normalizeSanity(p: SanityPiece): NormalizedProduct {
+  return {
+    id: p._id,
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+    images: p.images?.filter(Boolean) ?? [],
+    description: p.description ?? '',
+  };
 }
 
 /** Vertical (desktop) / horizontal (mobile) numbered index of product names. */
@@ -103,7 +111,13 @@ function IndexList({
   );
 }
 
-export default function FeaturedStrip({ products }: { products?: SanityProduct[] | null }) {
+export default function FeaturedStrip({
+  products,
+  heading,
+}: {
+  products?: SanityPiece[] | null;
+  heading?: SanityHeading | null;
+}) {
   const items: NormalizedProduct[] = products?.length
     ? products.map(normalizeSanity)
     : featuredProducts.map((p) => ({ id: p.id, slug: p.slug, name: p.name, price: p.price, images: p.images, description: p.description }));
@@ -138,8 +152,8 @@ export default function FeaturedStrip({ products }: { products?: SanityProduct[]
           <SectionHeading
             as="h2"
             align="left"
-            eyebrow="Featured Pieces"
-            lines={[[{ text: 'The ' }, { text: 'Edit', accent: true }]]}
+            eyebrow={heading?.eyebrow ?? 'Featured Pieces'}
+            lines={toLines(heading?.title, heading?.titleAccent, 'The', 'Edit')}
             className="text-almond-cream text-[length:clamp(40px,4.5vw,72px)]"
           />
           <div className="mt-10 hidden md:mt-14 md:block">

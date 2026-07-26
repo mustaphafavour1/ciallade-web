@@ -3,11 +3,29 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Product, formatPrice } from '@/data/products';
+import { formatPrice } from '@/data/products';
 import { fadeUp, reducedVariant } from '@/lib/animations';
 
+/**
+ * The one shape this card renders. Both Sanity pieces and the static mock
+ * products are normalized into it upstream, so the card never has to know
+ * where its data came from.
+ */
+export type CardPiece = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  images: string[];
+  /** Display label for the collection/category, e.g. "Headwear". */
+  category: string;
+};
+
+/** Rendered when a CMS piece has no image yet, so <Image> always has a src. */
+const FALLBACK_IMAGE = '/api/placeholder?w=800&h=1067&text=Ciallade';
+
 interface ProductCardProps {
-  product: Product;
+  product: CardPiece;
   index?: number;
 }
 
@@ -15,6 +33,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const shouldReduce = useReducedMotion();
 
   const variant = shouldReduce ? reducedVariant : fadeUp;
+  const image = product.images[0] || FALLBACK_IMAGE;
 
   return (
     <motion.article
@@ -25,7 +44,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       <Link href={`/collections/${product.slug}`} className="block">
         <div className="relative overflow-hidden bg-dark-wood" style={{ aspectRatio: '3/4' }}>
           <Image
-            src={product.images[0]}
+            src={image}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 25vw"
