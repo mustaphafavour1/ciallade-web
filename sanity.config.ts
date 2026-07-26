@@ -10,7 +10,12 @@ export default defineConfig({
   title: 'Ciallade Studio',
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'replace-with-your-project-id',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  basePath: '/studio',
+  /**
+   * Embedded in the Next.js site the Studio lives at /studio, but the
+   * standalone Sanity-hosted Studio serves from the domain root. The deploy
+   * script sets SANITY_STUDIO_BASEPATH=/ so one config serves both.
+   */
+  basePath: process.env.SANITY_STUDIO_BASEPATH || '/studio',
   plugins: [
     structureTool({
       structure: (S) =>
