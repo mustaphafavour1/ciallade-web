@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { forwardToGoogleForm } from '@/lib/forms/googleForm';
+import { ORDER_FORM } from '@/lib/forms/config';
 
 // Coerce any field value into the string shape the Google Form forwarder wants.
 const s = (v: unknown): string => (v == null ? '' : String(v));
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
 
   // Payment is good. Forward to the Google Form on a best-effort basis: the
   // buyer has already paid, so a forwarding failure must never reach them.
-  const forward = await forwardToGoogleForm(process.env.ORDER_FORM_PREFILL_URL, {
+  const forward = await forwardToGoogleForm(ORDER_FORM, {
     name: s(body.name),
     email: s(body.email),
     phone: s(body.phone),

@@ -1,87 +1,44 @@
 /**
  * SERVER-ONLY helper. Forwards a completed order or enquiry to a Google Form by
- * POSTing to its `formResponse` endpoint.
- *
- * Never import this from a client component — it is referenced only by the
- * `/api/order` and `/api/enquiry` route handlers. No secret is embedded here:
- * the prefill URL is passed in by the caller, which reads it from a server-only
- * env var.
+ * POSTing to its `formResponse` endpoint, using the direct entry-id map in
+ * `./config`. Never import this from a client component — it is referenced only
+ * by the `/api/order` and `/api/enquiry` route handlers.
  */
-
-// Sentinel token (the placeholder value pre-filled into the Google Form's
-// "Get pre-filled link") → the field key we send. Exported so callers/tests can
-// reason about the mapping.
-export const ORDER_SENTINELS: Record<string, string> = {
-  NAME: 'name',
-  EMAIL: 'email',
-  PHONE: 'phone',
-  ALTPHONE: 'altPhone',
-  ADDRESS: 'address',
-  PIECE: 'piece',
-  SIZE: 'size',
-  UNITPRICE: 'unitPrice',
-  QTY: 'qty',
-  TOTAL: 'total',
-  REF: 'reference',
-  STATUS: 'status',
-  NOTES: 'notes',
-};
-
-export const ENQUIRY_SENTINELS: Record<string, string> = {
-  NAME: 'name',
-  EMAIL: 'email',
-  PHONE: 'phone',
-  PIECE: 'piece',
-  MESSAGE: 'message',
-};
-
-// The two maps agree on every shared token, so a single merged lookup resolves
-// either form. Any sentinel found in a URL that isn't known here is ignored.
-const SENTINEL_TO_FIELD: Record<string, string> = { ...ORDER_SENTINELS, ...ENQUIRY_SENTINELS };
+import type { FormConfig } from './config';
 
 export async function forwardToGoogleForm(
-  prefillUrl: string | undefined,
-  values: Record<string, string>,
+  form: FormConfig,
+  values: Record<string, string | number | undefined | null>,
 ): Promise<{ ok: boolean; reason?: string }> {
-  if (!prefillUrl || !prefillUrl.trim()) {
-    return { ok: false, reason: 'not_configured' };
-  }
-
   try {
-    const url = new URL(prefillUrl);
-
-    // Read each `entry.<id>=<SENTINEL>` pair and build fieldKey -> entry id.
-    const fieldToEntryId: Record<string, string> = {};
-    url.searchParams.forEach((sentinel, key) => {
-      if (!key.startsWith('entry.')) return;
-      const fieldKey = SENTINEL_TO_FIELD[sentinel];
-      if (!fieldKey) return; // unknown sentinel — ignore
-      fieldToEntryId[fieldKey] = key.slice('entry.'.length);
-    });
-
-    // Derive the POST endpoint: same origin + path, trailing segment (e.g.
-    // `viewform` or `prefill`) replaced with `formResponse`.
-    const segments = url.pathname.split('/');
-    segments[segments.length - 1] = 'formResponse';
-    const endpoint = `${url.origin}${segments.join('/')}`;
-
-    // Build the urlencoded payload for every provided value with a mapped entry.
+    // Build the urlencoded payload: for each mapped field that has a value,
+    // append entry.<id>=<value>.
     const body = new URLSearchParams();
-    for (const [fieldKey, value] of Object.entries(values)) {
-      const entryId = fieldToEntryId[fieldKey];
-      if (!entryId || value == null) continue;
+    for (const [fieldKey, entryId] of Object.entries(form.fields)) {
+      const value = values[fieldKey];
+      if (value == null || value === '') continue;
       body.append(`entry.${entryId}`, String(value));
     }
 
-    await fetch(endpoint, {
+    // Nothing to send would silently record a blank response — treat as a bug.
+    if (Array.from(body.keys()).length === 0) {
+      return { ok: false, reason: 'empty' };
+    }
+
+    const endpoint = `https://docs.google.com/forms/d/e/${form.id}/formResponse`;
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
+      cache: 'no-store',
     });
 
-    // Google returns 200 HTML (or an opaque response). A resolved fetch is ok.
-    return { ok: true };
-  } catch {
+    // Google returns 200 on a recorded response (and often a redirect first).
+    const ok = res.status >= 200 && res.status < 400;
+    if (!ok) console.warn(`[googleForm] formResponse returned HTTP ${res.status}`);
+    return ok ? { ok: true } : { ok: false, reason: `status_${res.status}` };
+  } catch (err) {
+    console.warn('[googleForm] forward error', err);
     return { ok: false, reason: 'error' };
   }
 }

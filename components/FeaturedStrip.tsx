@@ -224,7 +224,7 @@ export default function FeaturedStrip({
                   {active.description}
                 </p>
                 <Link
-                  href={`/products/${active.slug}`}
+                  href={`/collections/${active.slug}`}
                   className="label-text mt-6 inline-block border border-nature-brown px-8 py-3.5 text-[10px] text-nature-brown transition-all duration-300 hover:bg-nature-brown hover:text-dark-wood"
                 >
                   Shop Now
