@@ -260,6 +260,7 @@ const PIECES = [
       'Structured linen top in warm ochre. Cut for confidence, finished with precision.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: true,
+    tags: ['ochre', 'linen', 'top', 'warm', 'minimal'],
     details: [
       { label: 'Material', value: '100% Nigerian-woven linen' },
       { label: 'Care', value: 'Cold hand wash, line dry in shade' },
@@ -276,6 +277,7 @@ const PIECES = [
       'Oversized silhouette in deep dark wood tones. The jacket that speaks before you do.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     featured: true,
+    tags: ['dark wood', 'brown', 'jacket', 'oversized', 'wool', 'statement'],
     details: [
       { label: 'Material', value: 'Structured wool-cotton blend, fully lined' },
       { label: 'Care', value: 'Dry clean only' },
@@ -291,6 +293,7 @@ const PIECES = [
     description: 'Hand-woven cap in rich caramel tones. One size, every story.',
     sizes: ['One Size'],
     featured: true,
+    tags: ['caramel', 'brown', 'cap', 'headwear', 'raffia', 'summer'],
     details: [
       { label: 'Material', value: 'Hand-woven raffia straw' },
       { label: 'Care', value: 'Spot clean, store flat' },
@@ -306,6 +309,7 @@ const PIECES = [
     description: 'Wide-leg cut in deep maroon. Effortless movement, deliberate presence.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
+    tags: ['maroon', 'red', 'trousers', 'bottoms', 'wide-leg', 'viscose'],
     details: [
       { label: 'Material', value: 'Fluid viscose twill' },
       { label: 'Care', value: 'Cool machine wash, warm iron' },
@@ -321,6 +325,7 @@ const PIECES = [
     description: 'Fluid draped shirt in almond cream. Softness with structure.',
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
+    tags: ['almond', 'cream', 'shirt', 'top', 'silk', 'draped', 'soft'],
     details: [
       { label: 'Material', value: 'Washed silk-cotton' },
       { label: 'Care', value: 'Cold hand wash, cool iron' },
@@ -336,6 +341,7 @@ const PIECES = [
     description: 'Bold bucket hat in autumn orange. Make your entrance from the crown down.',
     sizes: ['S/M', 'L/XL'],
     featured: false,
+    tags: ['orange', 'bucket hat', 'headwear', 'cotton', 'bold', 'summer'],
     details: [
       { label: 'Material', value: 'Garment-dyed cotton canvas' },
       { label: 'Care', value: 'Spot clean only' },
@@ -351,6 +357,7 @@ const PIECES = [
     description: 'Tailored linen shorts in warm coffee. Relaxed silhouette, refined finish.',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
+    tags: ['coffee', 'brown', 'shorts', 'bottoms', 'linen', 'relaxed', 'summer'],
     details: [
       { label: 'Material', value: '100% linen' },
       { label: 'Care', value: 'Cool machine wash, line dry' },
@@ -367,6 +374,7 @@ const PIECES = [
       'Signature BYRA cap embroidered with the geometric line motif. A crown for the self-defined.',
     sizes: ['One Size'],
     featured: true,
+    tags: ['nature brown', 'brown', 'cap', 'headwear', 'byra', 'embroidered', 'signature'],
     details: [
       { label: 'Material', value: 'Brushed cotton twill, embroidered BYRA motif' },
       { label: 'Care', value: 'Spot clean, air dry' },
@@ -382,6 +390,7 @@ const PIECES = [
     description: 'The centerpiece. An ochre statement coat cut to command every room.',
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
+    tags: ['ochre', 'coat', 'statement', 'wool', 'formal', 'occasion'],
     details: [
       { label: 'Material', value: 'Ochre wool melton, satin lined' },
       { label: 'Care', value: 'Dry clean only' },
@@ -397,6 +406,7 @@ const PIECES = [
     description: 'Heavyweight jersey tee in a boxy silhouette. The foundation of every look.',
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     featured: false,
+    tags: ['tee', 't-shirt', 'top', 'cotton', 'boxy', 'everyday', 'minimal'],
     details: [
       { label: 'Material', value: '240gsm heavyweight cotton jersey' },
       { label: 'Care', value: 'Cool machine wash, tumble dry low' },
@@ -731,6 +741,7 @@ async function seedPieces() {
         slug: { _type: 'slug', current: p.slug },
         collection: { _type: 'reference', _ref: collectionRef },
         description: p.description,
+        tags: p.tags,
         details: withKeys(p.details, 'det'),
         featured: p.featured,
         displayOrder: i,

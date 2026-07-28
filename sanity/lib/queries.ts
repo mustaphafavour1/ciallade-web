@@ -52,7 +52,7 @@ export const siteContentQuery = groq`
 
 const PIECE_FIELDS = `
   _id, name, "slug": slug.current, price, compareAtPrice, description,
-  sizes, inStock, featured, displayOrder,
+  sizes, inStock, featured, displayOrder, tags,
   details[]{ label, value },
   "images": images[].asset->url,
   "collectionLabel": collection->label,

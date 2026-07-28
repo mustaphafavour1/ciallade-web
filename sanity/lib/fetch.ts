@@ -128,6 +128,7 @@ export type SanityPiece = {
   inStock?: boolean;
   featured?: boolean;
   displayOrder?: number;
+  tags?: string[];
   details?: { label: string; value: string }[];
   images?: string[];
   collectionLabel?: string;

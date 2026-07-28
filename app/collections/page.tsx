@@ -34,6 +34,8 @@ function fromSanity(piece: SanityPiece): BrowsePiece {
     images: piece.images ?? [],
     category: label,
     categorySlug: piece.collectionSlug?.trim() || slugify(label),
+    description: piece.description ?? '',
+    tags: piece.tags ?? [],
   };
 }
 
@@ -46,6 +48,8 @@ function fromStatic(product: Product): BrowsePiece {
     images: product.images,
     category: product.category,
     categorySlug: slugify(product.category),
+    description: product.description,
+    tags: product.tags ?? [],
   };
 }
 

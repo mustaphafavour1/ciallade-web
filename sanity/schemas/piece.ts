@@ -47,6 +47,16 @@ export default defineType({
       group: 'main',
     }),
     defineField({
+      name: 'tags',
+      title: 'Tags (for search)',
+      type: 'array',
+      group: 'main',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      description:
+        'Keywords buyers might search — colour, occasion, fabric, style. e.g. linen, gold, wedding',
+    }),
+    defineField({
       name: 'details',
       title: 'Additional details',
       type: 'array',
