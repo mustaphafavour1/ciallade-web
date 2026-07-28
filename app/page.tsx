@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import dynamic from 'next/dynamic';
 import Hero from '@/components/Hero';
 import FeaturedStrip from '@/components/FeaturedStrip';
@@ -21,6 +23,16 @@ const IntroScreen = dynamic(() => import('@/components/IntroScreen'), { ssr: fal
 
 export const revalidate = 60; // Re-fetch Sanity content at most once a minute
 
+// Detect an owner-uploaded 10-Year Vision background in /public (png → jpg →
+// jpeg). Local files under public/ serve from the site root, so no next.config
+// remotePatterns entry is needed. Returns undefined when none is present.
+function detectVisionBg(): string | undefined {
+  for (const file of ['vision-bg.png', 'vision-bg.jpg', 'vision-bg.jpeg']) {
+    if (fs.existsSync(path.join(process.cwd(), 'public', file))) return `/${file}`;
+  }
+  return undefined;
+}
+
 export default async function HomePage() {
   const [site, featured, collections, testimonials, milestones] = await Promise.all([
     fetchSiteContent(),
@@ -29,6 +41,8 @@ export default async function HomePage() {
     fetchTestimonials(),
     fetchMilestones(),
   ]);
+
+  const visionBgUrl = detectVisionBg();
 
   return (
     <>
@@ -41,7 +55,7 @@ export default async function HomePage() {
       <Testimonials testimonials={testimonials} heading={site?.testimonials} />
       <JourneySoFar milestones={milestones} heading={site?.journey} />
       <TheDifference items={site?.difference?.items} heading={site?.difference?.heading} />
-      <TheFocus focus={site?.focus} />
+      <TheFocus focus={site?.focus} visionBgUrl={visionBgUrl} />
       <FooterRibbon footer={site?.footer} />
     </>
   );

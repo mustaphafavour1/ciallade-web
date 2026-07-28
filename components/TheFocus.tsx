@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView, useReducedMotion, animate } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useReducedMotion, animate, type Variants } from 'framer-motion';
+import Image from 'next/image';
 import { staggerContainer, fadeUp, slideInRight, reducedVariant } from '@/lib/animations';
 import SectionHeading, { toLines, type Segment } from '@/components/SectionHeading';
 import BYRAPattern from './BYRAPattern';
@@ -18,6 +19,16 @@ const FALLBACK_STATS = [
   { stat: '10+', label: 'Annual Drops' },
   { stat: '50+', label: 'Countries Reached' },
 ];
+
+// Editorial portraits, one per persona (cropped to a 4:5 frame at request time).
+const UNS = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&h=1125&q=80`;
+const PORTRAITS = [
+  UNS('photo-1506794778202-cad84cf45f1d'),
+  UNS('photo-1524504388940-b1c1722653e1'),
+  UNS('photo-1517841905240-472988babdf9'),
+];
+
+const AUTO_MS = 4800;
 
 /**
  * The reserved primitive for this section: an odometer count-up on the vision
@@ -56,7 +67,31 @@ function CountUpStat({ value }: { value: string }) {
   );
 }
 
-export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
+/**
+ * FRESH PRIMITIVE — a "photo-develop" reveal on the persona switcher: the
+ * selected portrait resolves from a desaturated, blurred, dimmed frame into a
+ * sharp, full-colour one, like a photograph developing. It reads as the person
+ * "coming into focus" — a literal match for who Ciallade dresses. No other
+ * section on the page uses a filter-develop or an interactive persona index.
+ */
+const developVariants: Variants = {
+  enter: { opacity: 0, scale: 1.06, filter: 'grayscale(1) brightness(0.45) blur(12px)' },
+  center: {
+    opacity: 1,
+    scale: 1,
+    filter: 'grayscale(0) brightness(1) blur(0px)',
+    transition: { duration: 1.05, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: { opacity: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
+export default function TheFocus({
+  focus,
+  visionBgUrl,
+}: {
+  focus?: SanityFocus | null;
+  visionBgUrl?: string;
+}) {
   const audience = focus?.audience?.length ? focus.audience : FALLBACK_AUDIENCE;
   const stats = focus?.stats?.length ? focus.stats : FALLBACK_STATS;
   const visionLabel = focus?.visionLabel ?? '10-Year Vision · 2035';
@@ -75,6 +110,23 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
   const container = shouldReduce ? {} : staggerContainer;
   const item = shouldReduce ? reducedVariant : fadeUp;
   const right = shouldReduce ? reducedVariant : slideInRight;
+
+  // ── Persona switcher state ──
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const activePortrait = PORTRAITS[active % PORTRAITS.length];
+
+  // Auto-advance through personas until the visitor takes over (hover/focus).
+  useEffect(() => {
+    if (shouldReduce || paused || audience.length < 2) return;
+    const id = setInterval(() => setActive((i) => (i + 1) % audience.length), AUTO_MS);
+    return () => clearInterval(id);
+  }, [shouldReduce, paused, audience.length]);
+
+  // Keep the active index valid if the audience list length changes.
+  useEffect(() => {
+    if (active >= audience.length) setActive(0);
+  }, [audience.length, active]);
 
   // Vision headline routed through SectionHeading; gold accent on the last line.
   const headlineParts = visionHeadline.split('\n');
@@ -100,33 +152,144 @@ export default function TheFocus({ focus }: { focus?: SanityFocus | null }) {
           />
         </div>
 
-        {/* Audience cards — dashed divider, elevated spacing/type */}
+        {/* ── Persona switcher: index list (left) + developing portrait (right) ── */}
         <motion.div
-          variants={container}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-32"
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+          className="px-6 md:px-12 mb-32 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:items-stretch"
         >
-          {audience.map((a, i) => (
-            <motion.div
-              key={a.label}
-              variants={item}
-              transition={{ delay: i * 0.1 }}
-              style={{ borderTop: '1px dashed rgba(28,16,4,0.28)', paddingTop: '2.25rem' }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <span className="label-text text-[11px] text-nature-brown">0{i + 1}</span>
-                <span className="flex-1 h-px bg-nature-brown/25" />
+          {/* Persona index — one expanded at a time */}
+          <div className="flex flex-col justify-center">
+            {audience.map((a, i) => {
+              const isActive = i === active;
+              return (
+                <button
+                  key={a.label}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  onMouseEnter={() => setActive(i)}
+                  onFocus={() => setActive(i)}
+                  aria-pressed={isActive}
+                  className="group border-t border-dark-wood/15 py-6 text-left outline-none first:border-t-0 focus-visible:bg-dark-wood/[0.03]"
+                >
+                  <div className="flex items-baseline gap-4">
+                    <span
+                      className="label-text text-[11px] tabular-nums transition-colors duration-300"
+                      style={{ color: isActive ? '#CE8400' : 'rgba(28,16,4,0.35)' }}
+                    >
+                      0{i + 1}
+                    </span>
+                    <h3
+                      className="font-display text-3xl leading-[1.05] transition-colors duration-500 md:text-4xl lg:text-5xl"
+                      style={{ color: isActive ? '#1C1004' : 'rgba(28,16,4,0.32)' }}
+                    >
+                      {a.label}
+                    </h3>
+                  </div>
+                  <AnimatePresence initial={false}>
+                    {isActive && (
+                      <motion.div
+                        key="body"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: shouldReduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="max-w-md pl-10 pt-4 font-body text-base font-light leading-relaxed text-dark-wood/65 md:text-lg">
+                          {a.body}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Developing portrait — fixed 4:5 frame so nothing jumps on swap */}
+          <div className="relative w-full overflow-hidden rounded-[3px] bg-dark-wood" style={{ aspectRatio: '4 / 5' }}>
+            {shouldReduce ? (
+              <Image
+                key={active}
+                src={activePortrait}
+                alt={`Editorial portrait — ${audience[active]?.label ?? ''}`}
+                fill
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <AnimatePresence>
+                <motion.div
+                  key={active}
+                  variants={developVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={activePortrait}
+                    alt={`Editorial portrait — ${audience[active]?.label ?? ''}`}
+                    fill
+                    sizes="(min-width: 1024px) 45vw, 100vw"
+                    className="object-cover"
+                  />
+                </motion.div>
+              </AnimatePresence>
+            )}
+
+            {/* Bottom scrim + caption */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-dark-wood/85 via-dark-wood/25 to-transparent p-6 md:p-8">
+              <div className="flex items-end justify-between gap-4">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={active}
+                    initial={{ opacity: 0, y: shouldReduce ? 0 : 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: shouldReduce ? 0 : -8 }}
+                    transition={{ duration: shouldReduce ? 0 : 0.4 }}
+                    className="font-display text-2xl leading-none text-almond-cream md:text-3xl"
+                  >
+                    {audience[active]?.label}
+                  </motion.p>
+                </AnimatePresence>
+                <span className="label-text flex-none text-[10px] tabular-nums text-nature-brown">
+                  0{active + 1} / 0{audience.length}
+                </span>
               </div>
-              <h3 className="font-display text-dark-wood text-3xl md:text-4xl mb-4 leading-[1.05]">{a.label}</h3>
-              <p className="font-body font-light text-dark-wood/65 text-base md:text-lg leading-relaxed">{a.body}</p>
-            </motion.div>
-          ))}
+            </div>
+
+            {/* Persona progress ticks */}
+            <div className="absolute right-6 top-6 z-10 flex flex-col gap-1.5 md:right-8 md:top-8">
+              {audience.map((a, i) => (
+                <span
+                  key={a.label}
+                  className="h-6 w-px transition-colors duration-300"
+                  style={{ backgroundColor: i === active ? '#CE8400' : 'rgba(255,235,205,0.35)' }}
+                />
+              ))}
+            </div>
+          </div>
         </motion.div>
 
         {/* 10-Year Vision — full-bleed dark block */}
         <div className="relative bg-dark-wood py-32 md:py-44 px-6 md:px-12 overflow-hidden">
-          <BYRAPattern animated={false} />
+          {visionBgUrl ? (
+            // Owner-uploaded background, dimmed so almond-cream text stays legible.
+            <div className="absolute inset-0 z-0" aria-hidden>
+              <Image src={visionBgUrl} alt="" fill priority sizes="100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-dark-wood/80" />
+              <div className="absolute inset-0 bg-gradient-to-t from-dark-wood via-dark-wood/70 to-dark-wood/55" />
+            </div>
+          ) : (
+            <BYRAPattern animated={false} />
+          )}
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
