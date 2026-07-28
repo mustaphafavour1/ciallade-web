@@ -121,24 +121,27 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
 
             {/* Right half: dark background, scroll-fill text */}
             <div
-              className="flex flex-col justify-center h-full px-6 md:px-12 py-20 overflow-y-auto lg:overflow-hidden"
+              className="flex flex-col justify-start h-full px-6 md:px-12 py-12 overflow-y-auto max-h-[55vh] lg:max-h-none"
               style={{ background: '#1C1004' }}
             >
               <SectionHeading
                 eyebrow={innerEyebrow}
                 lines={innerLines}
-                className="text-almond-cream text-3xl md:text-4xl mb-10"
+                className="text-almond-cream text-3xl md:text-4xl mb-8"
                 align="left"
                 as="h2"
               />
 
-              {/* Scroll-driven outline-fill text effect */}
-              <div className="relative mb-10">
+              {/* Scroll-driven outline-fill text effect. Both layers MUST share the
+                  exact same font-size + leading so the outline and the gold fill stay
+                  pixel-registered. Sized down (from clamp(28px,3vw,40px)/1.6) so the
+                  whole 6-paragraph passage + inner heading fit the sticky screen. */}
+              <div className="relative mb-8">
                 {/* Outline layer — always visible */}
                 <p
-                  className="font-body font-light leading-[1.6] whitespace-pre-line"
+                  className="font-body font-light leading-[1.5] whitespace-pre-line"
                   style={{
-                    fontSize: 'clamp(28px, 3vw, 40px)',
+                    fontSize: 'clamp(13px, 1.4vw, 16px)',
                     WebkitTextStroke: '0.5px #CE8400',
                     color: 'transparent',
                     userSelect: 'none',
@@ -149,9 +152,9 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
 
                 {/* Filled layer — clips from top to bottom as you scroll */}
                 <motion.p
-                  className="font-body font-light leading-[1.6] whitespace-pre-line absolute top-0 left-0 w-full"
+                  className="font-body font-light leading-[1.5] whitespace-pre-line absolute top-0 left-0 w-full"
                   style={{
-                    fontSize: 'clamp(28px, 3vw, 40px)',
+                    fontSize: 'clamp(13px, 1.4vw, 16px)',
                     color: '#CE8400',
                     clipPath,
                     pointerEvents: 'none',

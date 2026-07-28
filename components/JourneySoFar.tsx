@@ -117,14 +117,17 @@ export default function JourneySoFar({
           >
             {[m0, m1].filter(Boolean).map((m) => (
               <div key={m.year} className="flex gap-8 md:gap-16 items-start">
-                {/* Year — very large, odometer count-up */}
-                <div className="flex-none" style={{ minWidth: '120px' }}>
-                  <span
-                    className="font-display text-nature-brown leading-none"
-                    style={{ fontSize: 'clamp(56px, 7vw, 100px)' }}
-                  >
-                    <OdometerYear year={m.year} />
-                  </span>
+                {/* Year — very large, odometer count-up. Fixed-width cell (em-based,
+                    so it tracks the year's own responsive font-size) guarantees the
+                    divider + content begin at the same x for every milestone, even
+                    though "2020" (2.54em) and "2021" (2.10em) render at different
+                    intrinsic widths in the Argue display face. 2.9em clears the
+                    widest possible 4-digit string ("0000" = 2.88em). */}
+                <div
+                  className="flex-none font-display text-nature-brown leading-none"
+                  style={{ fontSize: 'clamp(56px, 7vw, 100px)', width: '2.9em' }}
+                >
+                  <OdometerYear year={m.year} />
                 </div>
                 {/* Vertical divider */}
                 <div className="flex-none w-px self-stretch bg-almond-cream/15 mt-2" />

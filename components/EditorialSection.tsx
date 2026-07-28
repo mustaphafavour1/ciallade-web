@@ -37,7 +37,7 @@ export default function EditorialSection({ editorial }: { editorial?: SanityEdit
           align="center"
           as="h2"
           lines={[[{ text: headline }], [{ text: subheadline, accent: true }]]}
-          className="text-almond-cream text-5xl md:text-7xl lg:text-8xl mb-14 md:mb-20"
+          className="text-almond-cream text-5xl md:text-7xl lg:text-8xl mb-3.5 md:mb-5"
         />
 
         {/* Concept centered below: cinematic framed photo revealed by a blinds wipe */}
