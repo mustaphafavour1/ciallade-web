@@ -12,6 +12,7 @@
     "studio:deploy": "SANITY_STUDIO_BASEPATH=/ sanity deploy"
   },
   "dependencies": {
+    "@paystack/inline-js": "^2.24.0",
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^3.99.0",
     "framer-motion": "^12.40.0",

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { formatPrice } from '@/data/products';
 import { fadeUp, staggerContainer, scaleIn, reducedVariant } from '@/lib/animations';
+import OrderOverlay from '@/components/checkout/OrderOverlay';
+import EnquiryOverlay from '@/components/checkout/EnquiryOverlay';
 
 /**
  * One shape for the detail view. Sanity pieces and the static mock products are
@@ -32,6 +34,8 @@ const FALLBACK_IMAGE = '/api/placeholder?w=900&h=1200&text=Ciallade';
 export default function ProductDetail({ product }: { product: DetailPiece }) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
   const shouldReduce = useReducedMotion();
 
   const containerVariants = shouldReduce ? {} : staggerContainer;
@@ -45,9 +49,14 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
   // Only strike through a compare-at price that is genuinely higher.
   const compareAtPrice =
     product.compareAtPrice && product.compareAtPrice > product.price ? product.compareAtPrice : null;
-  // Sizeless pieces (or a single "One Size") can go straight into the cart.
+  // Sizeless pieces (or a single "One Size") can be ordered straight away.
   const requiresSize = sizes.length > 0 && sizes[0] !== 'One Size';
-  const ctaLabel = outOfStock ? 'Out of Stock' : !requiresSize || selectedSize ? 'Add to Cart' : 'Select a Size';
+  const orderDisabled = outOfStock || (requiresSize && !selectedSize);
+  const orderLabel = outOfStock
+    ? 'Out of Stock'
+    : requiresSize && !selectedSize
+      ? 'Select a Size'
+      : 'Order This Piece';
 
   return (
     <div className="min-h-screen bg-dark-wood pt-24">
@@ -157,19 +166,22 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
             </motion.div>
           )}
 
-          {/* CTA */}
+          {/* CTA — order + enquiry */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
             <button
-              className="flex-1 bg-nature-brown text-dark-wood label-text text-xs py-4 px-8 hover:bg-ochre-brown transition-colors duration-300 disabled:opacity-40"
-              disabled={outOfStock || (requiresSize && !selectedSize)}
+              type="button"
+              onClick={() => setOrderOpen(true)}
+              disabled={orderDisabled}
+              className="flex-1 bg-nature-brown text-dark-wood label-text text-xs py-4 px-8 hover:bg-ochre-brown transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {ctaLabel}
+              {orderLabel}
             </button>
             <button
-              aria-label="Add to wishlist"
-              className="border border-almond-cream/20 text-almond-cream/60 hover:border-almond-cream/50 hover:text-almond-cream transition-all duration-300 py-4 px-6"
+              type="button"
+              onClick={() => setEnquiryOpen(true)}
+              className="flex-1 border border-almond-cream/25 text-almond-cream/80 label-text text-xs py-4 px-8 hover:border-nature-brown hover:text-nature-brown transition-all duration-300"
             >
-              <HeartIcon />
+              Make an Enquiry
             </button>
           </motion.div>
 
@@ -197,14 +209,23 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
           </motion.div>
         </motion.div>
       </div>
-    </div>
-  );
-}
 
-function HeartIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-    </svg>
+      <OrderOverlay
+        open={orderOpen}
+        onClose={() => setOrderOpen(false)}
+        piece={{
+          name: product.name,
+          price: product.price,
+          slug: product.slug,
+          size: selectedSize,
+          category: product.category,
+        }}
+      />
+      <EnquiryOverlay
+        open={enquiryOpen}
+        onClose={() => setEnquiryOpen(false)}
+        piece={{ name: product.name, category: product.category }}
+      />
+    </div>
   );
 }
