@@ -19,6 +19,8 @@ import type { SanityFooter } from '@/sanity/lib/fetch';
 
 const FOOTER_LINKS = [
   { label: 'Collections', href: '/collections' },
+  { label: 'Gallery', href: '/gallery' },
+  { label: 'Team', href: '/team' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];

@@ -19,7 +19,10 @@ export default defineType({
     { name: 'journey', title: 'Journey' },
     { name: 'difference', title: 'The Difference' },
     { name: 'focus', title: 'The Focus' },
+    { name: 'team', title: 'Team' },
+    { name: 'gallery', title: 'Gallery' },
     { name: 'footer', title: 'Footer & Social' },
+    { name: 'branding', title: 'Branding & SEO' },
   ],
   fields: [
     // ─── HERO ────────────────────────────────────────────────────────────────
@@ -188,6 +191,41 @@ export default defineType({
             },
           ],
         }),
+        defineField({
+          name: 'visionBgImage',
+          title: 'Vision background image / pattern (optional)',
+          type: 'image',
+          description: 'Sits behind the 10-Year Vision block, dimmed for legibility. Falls back to the built-in treatment when empty.',
+          options: { hotspot: true },
+        }),
+      ],
+    }),
+
+    // ─── TEAM ────────────────────────────────────────────────────────────────
+    defineField({
+      name: 'team',
+      title: 'About the Team',
+      type: 'object',
+      group: 'team',
+      options: { collapsible: true, collapsed: false },
+      description: 'The people are managed under "Team Members". This is just the section heading + intro.',
+      fields: [
+        defineField({ name: 'heading', title: 'Section heading', type: 'sectionHeading' }),
+        defineField({ name: 'intro', title: 'Intro paragraph', type: 'text', rows: 3 }),
+      ],
+    }),
+
+    // ─── GALLERY ─────────────────────────────────────────────────────────────
+    defineField({
+      name: 'gallery',
+      title: 'Gallery',
+      type: 'object',
+      group: 'gallery',
+      options: { collapsible: true, collapsed: false },
+      description: 'The images/videos are managed under "Gallery Items". This is just the section heading + intro.',
+      fields: [
+        defineField({ name: 'heading', title: 'Section heading', type: 'sectionHeading' }),
+        defineField({ name: 'intro', title: 'Intro paragraph', type: 'text', rows: 3 }),
       ],
     }),
 
@@ -252,6 +290,29 @@ export default defineType({
             },
           ],
         }),
+      ],
+    }),
+
+    // ─── BRANDING & SEO ──────────────────────────────────────────────────────
+    defineField({
+      name: 'branding',
+      title: 'Branding & SEO',
+      type: 'object',
+      group: 'branding',
+      options: { collapsible: true, collapsed: false },
+      description: 'Logo powers the browser-tab icon, Apple touch icon, and social share image unless you upload dedicated ones below.',
+      fields: [
+        defineField({
+          name: 'logo',
+          title: 'Logo (master — used as the fallback for all icons)',
+          type: 'image',
+          description: 'A square logo works best. Used for the browser tab, Apple icon, and social image unless overridden below.',
+        }),
+        defineField({ name: 'favicon', title: 'Browser-tab icon (optional — overrides logo)', type: 'image' }),
+        defineField({ name: 'appleIcon', title: 'Apple touch icon (optional — overrides logo)', type: 'image' }),
+        defineField({ name: 'ogImage', title: 'Social share image / Open Graph (optional — falls back to logo)', type: 'image' }),
+        defineField({ name: 'siteTitle', title: 'Site title (browser tab text)', type: 'string' }),
+        defineField({ name: 'siteDescription', title: 'Site description (for search & social)', type: 'text', rows: 2 }),
       ],
     }),
   ],

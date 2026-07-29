@@ -110,6 +110,26 @@ export default defineConfig({
                   .title('Journey Milestones')
                   .defaultOrdering([{ field: 'order', direction: 'asc' }])
               ),
+
+            S.divider(),
+
+            S.listItem()
+              .title('Team Members')
+              .schemaType('teamMember')
+              .child(
+                S.documentTypeList('teamMember')
+                  .title('Team Members')
+                  .defaultOrdering([{ field: 'order', direction: 'asc' }])
+              ),
+
+            S.listItem()
+              .title('Gallery Items')
+              .schemaType('galleryItem')
+              .child(
+                S.documentTypeList('galleryItem')
+                  .title('Gallery Items')
+                  .defaultOrdering([{ field: 'order', direction: 'asc' }])
+              ),
           ]),
     }),
     visionTool(),

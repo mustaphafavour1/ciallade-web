@@ -8,6 +8,8 @@ import {
   collectionsQuery,
   testimonialsQuery,
   milestonesQuery,
+  teamQuery,
+  galleryQuery,
 } from './queries';
 
 /**
@@ -38,6 +40,8 @@ export const fetchPieceSlugs = () => safeFetch<{ slug: string }[]>(pieceSlugsQue
 export const fetchCollections = () => safeFetch<SanityCollection[]>(collectionsQuery);
 export const fetchTestimonials = () => safeFetch<SanityTestimonial[]>(testimonialsQuery);
 export const fetchMilestones = () => safeFetch<SanityMilestone[]>(milestonesQuery);
+export const fetchTeam = () => safeFetch<SanityTeamMember[]>(teamQuery);
+export const fetchGallery = () => safeFetch<SanityGalleryItem[]>(galleryQuery);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -90,6 +94,39 @@ export type SanityFocus = {
   visionBody1?: string;
   visionBody2?: string;
   stats?: { stat: string; label: string }[];
+  visionBgUrl?: string;
+};
+
+export type SanityTeamSection = { heading?: SanityHeading; intro?: string };
+export type SanityGallerySection = { heading?: SanityHeading; intro?: string };
+
+export type SanityBranding = {
+  logoUrl?: string;
+  faviconUrl?: string;
+  appleIconUrl?: string;
+  ogImageUrl?: string;
+  siteTitle?: string;
+  siteDescription?: string;
+};
+
+export type SanityTeamMember = {
+  _id: string;
+  name: string;
+  role?: string;
+  bio?: string;
+  instagram?: string;
+  featuredOnHome?: boolean;
+  photo?: string;
+};
+
+export type SanityGalleryItem = {
+  _id: string;
+  title?: string;
+  mediaType?: 'image' | 'video';
+  image?: string;
+  video?: string;
+  videoUrl?: string;
+  featuredOnHome?: boolean;
 };
 
 export type SanityFooter = {
@@ -114,7 +151,10 @@ export type SanitySiteContent = {
   journey?: SanityHeading;
   difference?: SanityDifference;
   focus?: SanityFocus;
+  team?: SanityTeamSection;
+  gallery?: SanityGallerySection;
   footer?: SanityFooter;
+  branding?: SanityBranding;
 };
 
 export type SanityPiece = {

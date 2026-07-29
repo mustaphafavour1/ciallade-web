@@ -4,6 +4,8 @@ import piece from './piece';
 import collection from './collection';
 import testimonial from './testimonial';
 import journeyMilestone from './journeyMilestone';
+import teamMember from './teamMember';
+import galleryItem from './galleryItem';
 
 export const schemaTypes = [
   // Reusable objects
@@ -15,4 +17,6 @@ export const schemaTypes = [
   collection,
   testimonial,
   journeyMilestone,
+  teamMember,
+  galleryItem,
 ];

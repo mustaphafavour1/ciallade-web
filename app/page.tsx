@@ -10,6 +10,8 @@ import Testimonials from '@/components/Testimonials';
 import JourneySoFar from '@/components/JourneySoFar';
 import TheDifference from '@/components/TheDifference';
 import TheFocus from '@/components/TheFocus';
+import AboutTeam from '@/components/AboutTeam';
+import GalleryPreview from '@/components/GalleryPreview';
 import FooterRibbon from '@/components/FooterRibbon';
 import {
   fetchSiteContent,
@@ -17,15 +19,16 @@ import {
   fetchCollections,
   fetchTestimonials,
   fetchMilestones,
+  fetchTeam,
+  fetchGallery,
 } from '@/sanity/lib/fetch';
 
 const IntroScreen = dynamic(() => import('@/components/IntroScreen'), { ssr: false });
 
 export const revalidate = 60; // Re-fetch Sanity content at most once a minute
 
-// Detect an owner-uploaded 10-Year Vision background in /public (png → jpg →
-// jpeg). Local files under public/ serve from the site root, so no next.config
-// remotePatterns entry is needed. Returns undefined when none is present.
+// Fallback for the 10-Year Vision background: a file dropped in /public still
+// works, but a Sanity upload (focus.visionBgUrl) takes priority.
 function detectVisionBg(): string | undefined {
   for (const file of ['vision-bg.png', 'vision-bg.jpg', 'vision-bg.jpeg']) {
     if (fs.existsSync(path.join(process.cwd(), 'public', file))) return `/${file}`;
@@ -34,15 +37,17 @@ function detectVisionBg(): string | undefined {
 }
 
 export default async function HomePage() {
-  const [site, featured, collections, testimonials, milestones] = await Promise.all([
+  const [site, featured, collections, testimonials, milestones, team, gallery] = await Promise.all([
     fetchSiteContent(),
     fetchFeaturedPieces(),
     fetchCollections(),
     fetchTestimonials(),
     fetchMilestones(),
+    fetchTeam(),
+    fetchGallery(),
   ]);
 
-  const visionBgUrl = detectVisionBg();
+  const visionBgUrl = site?.focus?.visionBgUrl || detectVisionBg();
 
   return (
     <>
@@ -56,6 +61,8 @@ export default async function HomePage() {
       <JourneySoFar milestones={milestones} heading={site?.journey} />
       <TheDifference items={site?.difference?.items} heading={site?.difference?.heading} />
       <TheFocus focus={site?.focus} visionBgUrl={visionBgUrl} />
+      <AboutTeam members={team} section={site?.team} />
+      <GalleryPreview items={gallery} section={site?.gallery} />
       <FooterRibbon footer={site?.footer} />
     </>
   );

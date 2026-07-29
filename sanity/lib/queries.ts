@@ -39,14 +39,41 @@ export const siteContentQuery = groq`
       heading${HEADING},
       audience[]{ label, body },
       visionLabel, visionHeadline, visionAccent, visionBody1, visionBody2,
-      stats[]{ stat, label }
+      stats[]{ stat, label },
+      "visionBgUrl": visionBgImage.asset->url + ${IMG(1600)}
     },
+    team{ heading${HEADING}, intro },
+    gallery{ heading${HEADING}, intro },
     footer{
       wordmark, eyebrow, headlineLine1, headlineLine2,
       ctaText, ctaLink, tagline,
       navLinks[]{ label, href },
       socialLinks[]{ platform, url }
+    },
+    branding{
+      "logoUrl": logo.asset->url,
+      "faviconUrl": favicon.asset->url,
+      "appleIconUrl": appleIcon.asset->url,
+      "ogImageUrl": ogImage.asset->url,
+      siteTitle, siteDescription
     }
+  }
+`;
+
+/** Team members shown on the homepage preview + /team. */
+export const teamQuery = groq`
+  *[_type == "teamMember"] | order(order asc, name asc){
+    _id, name, role, bio, instagram, featuredOnHome,
+    "photo": photo.asset->url + ${IMG(800)}
+  }
+`;
+
+/** Gallery items (images + videos) for the homepage preview + /gallery. */
+export const galleryQuery = groq`
+  *[_type == "galleryItem"] | order(order asc){
+    _id, title, mediaType, featuredOnHome, videoUrl,
+    "image": image.asset->url + ${IMG(1200)},
+    "video": video.asset->url
   }
 `;
 
