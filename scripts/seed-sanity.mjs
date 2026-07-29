@@ -246,6 +246,19 @@ const CATEGORY_TO_COLLECTION = {
   'Statement Pieces': 'collection-statement-pieces',
 };
 
+/**
+ * Which size selector each piece shows on its product page. Tops use the top
+ * measurement chart, trousers/shorts the bottom chart, caps/headwear are
+ * one-size (no size UI), everything else keeps the standard S/M/L chips.
+ */
+const CATEGORY_TO_SIZE_TYPE = {
+  Tops: 'top',
+  Bottoms: 'bottom',
+  Headwear: 'none',
+  Jackets: 'standard',
+  'Statement Pieces': 'standard',
+};
+
 const MADE_IN = { label: 'Made in', value: 'Lagos, Nigeria' };
 
 /** The 10 products from data/products.ts, plus spec rows for the product page. */
@@ -747,6 +760,7 @@ async function seedPieces() {
         displayOrder: i,
         price: p.price,
         sizes: p.sizes,
+        sizeType: CATEGORY_TO_SIZE_TYPE[p.category] ?? 'standard',
         inStock: true,
         images,
       },

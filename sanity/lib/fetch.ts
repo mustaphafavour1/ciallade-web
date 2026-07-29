@@ -125,6 +125,7 @@ export type SanityPiece = {
   compareAtPrice?: number;
   description?: string;
   sizes?: string[];
+  sizeType?: 'standard' | 'top' | 'bottom' | 'both' | 'none';
   inStock?: boolean;
   featured?: boolean;
   displayOrder?: number;

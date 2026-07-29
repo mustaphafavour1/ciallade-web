@@ -21,6 +21,7 @@ function fromSanity(piece: SanityPiece): DetailPiece {
     sizes: piece.sizes ?? [],
     details: piece.details ?? [],
     inStock: piece.inStock,
+    sizeType: piece.sizeType ?? 'standard',
   };
 }
 
@@ -34,6 +35,7 @@ function fromStatic(product: Product): DetailPiece {
     description: product.description,
     images: product.images,
     sizes: product.sizes,
+    sizeType: product.sizeType ?? 'standard',
   };
 }
 

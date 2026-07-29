@@ -14,6 +14,8 @@ export type Product = {
   sizes: string[];
   featured: boolean;
   tags?: string[];
+  /** Which size selector the product page shows. Defaults to 'standard'. */
+  sizeType?: 'standard' | 'top' | 'bottom' | 'both' | 'none';
 };
 
 export const products: Product[] = [
@@ -29,6 +31,7 @@ export const products: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: true,
     tags: ['ochre', 'linen', 'top', 'warm', 'minimal'],
+    sizeType: 'top',
   },
   {
     id: '002',
@@ -42,6 +45,7 @@ export const products: Product[] = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     featured: true,
     tags: ['dark wood', 'brown', 'jacket', 'oversized', 'wool', 'statement'],
+    sizeType: 'standard',
   },
   {
     id: '003',
@@ -55,6 +59,7 @@ export const products: Product[] = [
     sizes: ['One Size'],
     featured: true,
     tags: ['caramel', 'brown', 'cap', 'headwear', 'raffia', 'summer'],
+    sizeType: 'none',
   },
   {
     id: '004',
@@ -68,6 +73,7 @@ export const products: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
     tags: ['maroon', 'red', 'trousers', 'bottoms', 'wide-leg', 'viscose'],
+    sizeType: 'bottom',
   },
   {
     id: '005',
@@ -81,6 +87,7 @@ export const products: Product[] = [
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
     tags: ['almond', 'cream', 'shirt', 'top', 'silk', 'draped', 'soft'],
+    sizeType: 'top',
   },
   {
     id: '006',
@@ -94,6 +101,7 @@ export const products: Product[] = [
     sizes: ['S/M', 'L/XL'],
     featured: false,
     tags: ['orange', 'bucket hat', 'headwear', 'cotton', 'bold', 'summer'],
+    sizeType: 'none',
   },
   {
     id: '007',
@@ -107,6 +115,7 @@ export const products: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     featured: false,
     tags: ['coffee', 'brown', 'shorts', 'bottoms', 'linen', 'relaxed', 'summer'],
+    sizeType: 'bottom',
   },
   {
     id: '008',
@@ -121,6 +130,7 @@ export const products: Product[] = [
     sizes: ['One Size'],
     featured: true,
     tags: ['nature brown', 'brown', 'cap', 'headwear', 'byra', 'embroidered', 'signature'],
+    sizeType: 'none',
   },
   {
     id: '009',
@@ -134,6 +144,7 @@ export const products: Product[] = [
     sizes: ['S', 'M', 'L', 'XL'],
     featured: true,
     tags: ['ochre', 'coat', 'statement', 'wool', 'formal', 'occasion'],
+    sizeType: 'standard',
   },
   {
     id: '010',
@@ -147,6 +158,7 @@ export const products: Product[] = [
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     featured: false,
     tags: ['tee', 't-shirt', 'top', 'cotton', 'boxy', 'everyday', 'minimal'],
+    sizeType: 'top',
   },
 ];
 

@@ -4,10 +4,19 @@ import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Ruler } from 'lucide-react';
 import { formatPrice } from '@/data/products';
 import { fadeUp, staggerContainer, scaleIn, reducedVariant } from '@/lib/animations';
 import OrderOverlay from '@/components/checkout/OrderOverlay';
 import EnquiryOverlay from '@/components/checkout/EnquiryOverlay';
+import SizePicker from '@/components/checkout/SizePicker';
+import {
+  countChosen,
+  isMeasurementType,
+  summarizeMeasurements,
+  type MeasurementSelection,
+  type SizeType,
+} from '@/lib/sizeCharts';
 
 /**
  * One shape for the detail view. Sanity pieces and the static mock products are
@@ -26,6 +35,8 @@ export type DetailPiece = {
   sizes: string[];
   details?: { label: string; value: string }[];
   inStock?: boolean;
+  /** Which size UI to show. Defaults to 'standard' (the S/M/L chips). */
+  sizeType?: 'standard' | 'top' | 'bottom' | 'both' | 'none';
 };
 
 /** Rendered when a CMS piece has no image yet, so <Image> always has a src. */
@@ -36,6 +47,9 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
   const [activeImage, setActiveImage] = useState(0);
   const [orderOpen, setOrderOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [measurements, setMeasurements] = useState<MeasurementSelection>({});
+  const [orderNudged, setOrderNudged] = useState(false);
   const shouldReduce = useReducedMotion();
 
   const containerVariants = shouldReduce ? {} : staggerContainer;
@@ -49,14 +63,38 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
   // Only strike through a compare-at price that is genuinely higher.
   const compareAtPrice =
     product.compareAtPrice && product.compareAtPrice > product.price ? product.compareAtPrice : null;
-  // Sizeless pieces (or a single "One Size") can be ordered straight away.
-  const requiresSize = sizes.length > 0 && sizes[0] !== 'One Size';
+
+  const sizeType: SizeType = product.sizeType ?? 'standard';
+  const measurementBased = isMeasurementType(sizeType);
+  const isNone = sizeType === 'none';
+
+  // Title-cased summary for the page, uppercase for the forwarded order record.
+  const pageSummary = measurementBased ? summarizeMeasurements(sizeType, measurements) : null;
+  const orderSummary = measurementBased
+    ? summarizeMeasurements(sizeType, measurements, { uppercase: true })
+    : null;
+  const anyMeasurementChosen = measurementBased && countChosen(sizeType, measurements) > 0;
+
+  // Standard S/M/L chips only gate the order button. "One Size" or measurement /
+  // one-size pieces can be ordered straight away.
+  const requiresSize = sizeType === 'standard' && sizes.length > 0 && sizes[0] !== 'One Size';
   const orderDisabled = outOfStock || (requiresSize && !selectedSize);
   const orderLabel = outOfStock
     ? 'Out of Stock'
     : requiresSize && !selectedSize
       ? 'Select a Size'
       : 'Order This Piece';
+
+  // Measurements never hard-block payment. The one nudge: the first order click
+  // with nothing measured opens the picker instead of the order overlay.
+  const handleOrderClick = () => {
+    if (measurementBased && !anyMeasurementChosen && !orderNudged) {
+      setOrderNudged(true);
+      setPickerOpen(true);
+      return;
+    }
+    setOrderOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-dark-wood pt-24">
@@ -143,8 +181,8 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
             </motion.p>
           )}
 
-          {/* Size selection */}
-          {sizes.length > 0 && (
+          {/* Size selection — standard S/M/L chips */}
+          {sizeType === 'standard' && sizes.length > 0 && (
             <motion.div variants={itemVariants} className="mb-8">
               <p className="label-text text-xs text-almond-cream/60 mb-4">Select Size</p>
               <div className="flex flex-wrap gap-2">
@@ -166,11 +204,44 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
             </motion.div>
           )}
 
+          {/* Size selection — measurement-based (top / bottom / both) */}
+          {measurementBased && (
+            <motion.div variants={itemVariants} className="mb-8">
+              <p className="label-text text-xs text-almond-cream/60 mb-4">Your Measurements</p>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="inline-flex items-center gap-2.5 border border-almond-cream/25 text-almond-cream/85 label-text text-[11px] py-3.5 px-6 hover:border-nature-brown hover:text-nature-brown transition-all duration-300"
+              >
+                <Ruler size={15} strokeWidth={1.5} />
+                {anyMeasurementChosen ? 'Edit Your Measurements' : 'Specify Your Measurements'}
+              </button>
+
+              {anyMeasurementChosen && pageSummary ? (
+                <div className="mt-4 border-l-2 border-nature-brown/60 pl-4 py-1">
+                  <p className="font-body font-light text-almond-cream/75 text-sm leading-relaxed">
+                    {pageSummary.text}
+                  </p>
+                  {!pageSummary.complete && (
+                    <p className="mt-1.5 text-[11px] text-almond-cream/45 font-body">
+                      Some measurements aren&apos;t set yet — we&apos;ll confirm them with you.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="mt-3 text-[11px] text-almond-cream/45 font-body max-w-md">
+                  Recommended — set your measurements for a tailored fit. You can also confirm
+                  them with us after ordering.
+                </p>
+              )}
+            </motion.div>
+          )}
+
           {/* CTA — order + enquiry */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3">
             <button
               type="button"
-              onClick={() => setOrderOpen(true)}
+              onClick={handleOrderClick}
               disabled={orderDisabled}
               className="flex-1 bg-nature-brown text-dark-wood label-text text-xs py-4 px-8 hover:bg-ochre-brown transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -217,10 +288,22 @@ export default function ProductDetail({ product }: { product: DetailPiece }) {
           name: product.name,
           price: product.price,
           slug: product.slug,
-          size: selectedSize,
+          size: measurementBased ? null : isNone ? 'One Size' : selectedSize,
           category: product.category,
+          sizeSummary: orderSummary?.text ?? null,
+          sizeComplete: orderSummary ? orderSummary.complete : undefined,
+          sizeMissing: orderSummary?.missing,
         }}
       />
+      {measurementBased && (
+        <SizePicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          sizeType={sizeType}
+          value={measurements}
+          onChange={(selection) => setMeasurements(selection)}
+        />
+      )}
       <EnquiryOverlay
         open={enquiryOpen}
         onClose={() => setEnquiryOpen(false)}

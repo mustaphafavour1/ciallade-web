@@ -12,6 +12,16 @@ export type OrderPiece = {
   slug: string;
   size: string | null;
   category: string;
+  /**
+   * Measurement-based pieces pass a readable summary here (e.g.
+   * "TOP — Chest 40 · Length 27 · Sleeve — · Shoulder 18"). When present it
+   * becomes the order's Size value instead of `size`.
+   */
+  sizeSummary?: string | null;
+  /** False when some measurement rows are still unset. */
+  sizeComplete?: boolean;
+  /** Short labels of the unset rows, listed in the incomplete flag. */
+  sizeMissing?: string[];
 };
 
 type OrderOverlayProps = {
@@ -49,6 +59,19 @@ export default function OrderOverlay({ open, onClose, piece }: OrderOverlayProps
 
   const unitPrice = piece.price;
   const total = unitPrice * qty;
+
+  // Measurement-based pieces send their summary as the Size value. If any row is
+  // still unset we APPEND a clear flag so the admin sees it in the Orders form —
+  // the order itself is never blocked on incomplete measurements.
+  const measurementBased = Boolean(piece.sizeSummary);
+  const baseSize = piece.sizeSummary ?? piece.size ?? 'One Size';
+  const sizeIncomplete = measurementBased && piece.sizeComplete === false;
+  const missingLabels = piece.sizeMissing ?? [];
+  const orderSize = sizeIncomplete
+    ? `${baseSize}  ⚠ SIZE SPECS INCOMPLETE${
+        missingLabels.length ? ` (missing: ${missingLabels.join(', ')})` : ''
+      }`
+    : baseSize;
   const emailValid = EMAIL_RE.test(form.email.trim());
   const requiredFilled =
     form.name.trim().length > 0 &&
@@ -105,7 +128,7 @@ export default function OrderOverlay({ open, onClose, piece }: OrderOverlayProps
           address: form.address.trim(),
           notes: form.notes.trim(),
           piece: piece.name,
-          size: piece.size ?? '',
+          size: orderSize,
           qty,
           unitPrice,
           total,
@@ -137,11 +160,11 @@ export default function OrderOverlay({ open, onClose, piece }: OrderOverlayProps
           piece: piece.name,
           slug: piece.slug,
           category: piece.category,
-          size: piece.size ?? 'One Size',
+          size: orderSize,
           qty,
           custom_fields: [
             { display_name: 'Piece', variable_name: 'piece', value: piece.name },
-            { display_name: 'Size', variable_name: 'size', value: piece.size ?? 'One Size' },
+            { display_name: 'Size', variable_name: 'size', value: orderSize },
             { display_name: 'Quantity', variable_name: 'quantity', value: String(qty) },
           ],
         },
@@ -312,7 +335,7 @@ export default function OrderOverlay({ open, onClose, piece }: OrderOverlayProps
 
                   <div className="space-y-3">
                     <SummaryRow label="Piece" value={piece.name} />
-                    <SummaryRow label="Size" value={piece.size ?? 'One Size'} />
+                    <SummaryRow label="Size" value={baseSize} />
                     <SummaryRow label="Unit Price" value={formatPrice(unitPrice)} />
 
                     <div className="flex items-center justify-between gap-4 py-1">
@@ -353,6 +376,13 @@ export default function OrderOverlay({ open, onClose, piece }: OrderOverlayProps
                     <span className="label-text text-[10px] text-almond-cream/40">Total</span>
                     <span className="font-display text-nature-brown text-3xl">{formatPrice(total)}</span>
                   </div>
+
+                  {sizeIncomplete && (
+                    <p className="mt-4 text-[11px] text-almond-cream/50 font-body flex items-start gap-2">
+                      <AlertCircle size={13} strokeWidth={1.5} className="text-nature-brown mt-px shrink-0" />
+                      Your size specs aren&apos;t fully set — we&apos;ll reach out to confirm.
+                    </p>
+                  )}
 
                   <div className="mt-8 md:mt-auto md:pt-8">
                     {!paymentConfigured ? (

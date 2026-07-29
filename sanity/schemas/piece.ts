@@ -104,8 +104,27 @@ export default defineType({
       validation: (r) => r.min(0),
     }),
     defineField({
+      name: 'sizeType',
+      title: 'Size selector type',
+      type: 'string',
+      group: 'commerce',
+      description:
+        'How buyers pick a size. "Standard" shows the S/M/L chips below. The measurement options open a chart-based popup instead; "One size" hides the size UI entirely.',
+      options: {
+        list: [
+          { title: 'Standard — S / M / L chips', value: 'standard' },
+          { title: 'Top — chest / length / sleeve / shoulder', value: 'top' },
+          { title: 'Bottom — waist / hip / inseam / thigh', value: 'bottom' },
+          { title: 'Both — top & bottom measurements', value: 'both' },
+          { title: 'One size — no size UI', value: 'none' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'standard',
+    }),
+    defineField({
       name: 'sizes',
-      title: 'Available sizes',
+      title: 'Available sizes (used by the Standard selector)',
       type: 'array',
       group: 'commerce',
       of: [{ type: 'string' }],
