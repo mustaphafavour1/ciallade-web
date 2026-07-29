@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion, type MotionValue } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import SectionHeading, { toLines } from '@/components/SectionHeading';
@@ -19,7 +19,40 @@ We are not competing with the houses of Milan or Paris. We are building somethin
 
 Ciallade is for those who already know who they are — and simply need clothing that agrees.`;
 
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80';
+const DEFAULT_IMAGE =
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&h=1000&q=80';
+
+// Slightly larger than the original clamp(28px,3vw,40px). The text now lives in
+// a normally-scrolling column (the image is pinned), so it no longer has to fit
+// one screen and can breathe at full size.
+const FONT = 'clamp(30px, 3.4vw, 46px)';
+
+/**
+ * One word of the passage: a gold outline that fills solid as it scrolls up
+ * through the reading zone. The base (stroked, transparent) layer and the gold
+ * fill layer render the same glyphs in the same box, so they stay registered.
+ */
+function FillWord({
+  word,
+  progress,
+  range,
+}: {
+  word: string;
+  progress: MotionValue<number>;
+  range: [number, number];
+}) {
+  const opacity = useTransform(progress, range, [0, 1]);
+  return (
+    <span className="relative inline-block">
+      <span aria-hidden style={{ WebkitTextStroke: '0.6px rgba(206,132,0,0.5)', color: 'transparent' }}>
+        {word}
+      </span>
+      <motion.span aria-hidden className="absolute inset-0" style={{ color: '#CE8400', opacity }}>
+        {word}
+      </motion.span>
+    </span>
+  );
+}
 
 export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhilosophy | null }) {
   const philosophyText = philosophy?.philosophyText?.trim() || DEFAULT_PHILOSOPHY_TEXT;
@@ -27,7 +60,6 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
   const linkText = philosophy?.linkText?.trim() || 'Our Story';
   const linkHref = philosophy?.linkHref?.trim() || '/about';
 
-  // Outer section heading (above the sticky container).
   const eyebrow = philosophy?.heading?.eyebrow?.trim() || 'Our Foundation';
   const lines = toLines(
     philosophy?.heading?.title,
@@ -36,7 +68,6 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
     'stitch.'
   );
 
-  // Inner heading, beside the philosophy text.
   const innerEyebrow = philosophy?.innerHeading?.eyebrow?.trim() || 'Brand Philosophy';
   const innerLines = toLines(
     philosophy?.innerHeading?.title,
@@ -46,31 +77,22 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
   );
 
   const reduce = useReducedMotion();
-  const outerRef = useRef<HTMLDivElement>(null);
 
+  // Fill progress is tied to the text column scrolling through the viewport.
+  const textRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: outerRef,
-    offset: ['start start', 'end end'],
+    target: textRef,
+    offset: ['start 0.85', 'end 0.55'],
   });
 
-  // clipPath reveals the filled text from top to bottom as scroll progresses
-  const clipPath = useTransform(
-    scrollYProgress,
-    [0, 1],
-    ['inset(0 0 100% 0)', 'inset(0 0 0% 0)']
-  );
-
-  // Subtle scroll-tied parallax drift on the living left image (disabled on reduce).
-  const imageParallax = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduce ? ['0%', '0%'] : ['-5%', '5%']
-  );
+  const paragraphs = philosophyText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const totalWords = paragraphs.reduce((n, p) => n + p.split(/\s+/).length, 0);
+  let wordCursor = 0;
 
   return (
-    <>
-      {/* Section title above sticky container — routed through SectionHeading */}
-      <div className="bg-dark-wood px-6 md:px-12 pt-32 md:pt-44 pb-16">
+    <section className="bg-dark-wood">
+      {/* Section title */}
+      <div className="px-6 md:px-12 pt-32 md:pt-44 pb-12 md:pb-16">
         <SectionHeading
           eyebrow={eyebrow}
           lines={lines}
@@ -80,102 +102,74 @@ export default function BrandPhilosophy({ philosophy }: { philosophy?: SanityPhi
         />
       </div>
 
-      {/* Outer scroll container — tall so there's room to scroll through the text */}
-      <div ref={outerRef} className="relative" style={{ minHeight: '250vh' }}>
-        {/* Sticky inner: left image + right text, stays in viewport while scrolling */}
-        <div className="sticky top-0 h-screen overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+      {/* Pinned image (left) + fully-scrolling text (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-start">
+        {/* Left: image pins for the length of the text scroll */}
+        <div
+          className="relative h-[45vh] overflow-hidden lg:sticky lg:top-0 lg:h-screen"
+          style={{ borderRight: '3px solid #CE8400' }}
+        >
+          <motion.div
+            className="relative h-full w-full"
+            animate={reduce ? undefined : { scale: [1, 1.08, 1], x: ['0%', '1%', '0%'], y: ['0%', '-1%', '0%'] }}
+            transition={reduce ? undefined : { duration: 24, ease: 'easeInOut', repeat: Infinity }}
+          >
+            <Image
+              src={imageUrl}
+              alt="Ciallade brand editorial — warm tones, structured silhouette"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              priority
+            />
+          </motion.div>
+        </div>
 
-            {/* Left half: LIVING editorial image — infinite Ken-Burns + scroll parallax */}
-            <div
-              className="relative min-h-[45vh] lg:min-h-0 overflow-hidden"
-              style={{ borderRight: '3px solid #CE8400' }}
-            >
-              {/* Parallax layer (scroll-tied), oversized so the drift never reveals an edge */}
-              <motion.div className="absolute -inset-[12%]" style={{ y: imageParallax }}>
-                {/* Ken-Burns layer — continuous slow zoom + gentle pan */}
-                <motion.div
-                  className="relative h-full w-full"
-                  animate={
-                    reduce
-                      ? undefined
-                      : { scale: [1, 1.08, 1], x: ['0%', '1%', '0%'], y: ['0%', '-1%', '0%'] }
-                  }
-                  transition={
-                    reduce
-                      ? undefined
-                      : { duration: 24, ease: 'easeInOut', repeat: Infinity }
-                  }
-                >
-                  <Image
-                    src={imageUrl}
-                    alt="Ciallade brand editorial — warm tones, structured silhouette"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                    priority
-                  />
-                </motion.div>
-              </motion.div>
-            </div>
+        {/* Right: scrolling text with the outline→gold fill effect */}
+        <div ref={textRef} className="px-6 md:px-12 py-16 md:py-24 lg:py-28">
+          <SectionHeading
+            eyebrow={innerEyebrow}
+            lines={innerLines}
+            className="text-almond-cream text-3xl md:text-4xl mb-10 md:mb-12"
+            align="left"
+            as="h2"
+          />
 
-            {/* Right half: dark background, scroll-fill text */}
-            <div
-              className="flex flex-col justify-start h-full px-6 md:px-12 py-12 overflow-y-auto max-h-[55vh] lg:max-h-none"
-              style={{ background: '#1C1004' }}
-            >
-              <SectionHeading
-                eyebrow={innerEyebrow}
-                lines={innerLines}
-                className="text-almond-cream text-3xl md:text-4xl mb-8"
-                align="left"
-                as="h2"
-              />
-
-              {/* Scroll-driven outline-fill text effect. Both layers MUST share the
-                  exact same font-size + leading so the outline and the gold fill stay
-                  pixel-registered. Sized down (from clamp(28px,3vw,40px)/1.6) so the
-                  whole 6-paragraph passage + inner heading fit the sticky screen. */}
-              <div className="relative mb-8">
-                {/* Outline layer — always visible */}
-                <p
-                  className="font-body font-light leading-[1.5] whitespace-pre-line"
-                  style={{
-                    fontSize: 'clamp(13px, 1.4vw, 16px)',
-                    WebkitTextStroke: '0.5px #CE8400',
-                    color: 'transparent',
-                    userSelect: 'none',
-                  }}
-                >
-                  {philosophyText}
-                </p>
-
-                {/* Filled layer — clips from top to bottom as you scroll */}
-                <motion.p
-                  className="font-body font-light leading-[1.5] whitespace-pre-line absolute top-0 left-0 w-full"
-                  style={{
-                    fontSize: 'clamp(13px, 1.4vw, 16px)',
-                    color: '#CE8400',
-                    clipPath,
-                    pointerEvents: 'none',
-                  }}
-                >
-                  {philosophyText}
-                </motion.p>
-              </div>
-
-              <a
-                href={linkHref}
-                className="inline-flex items-center gap-2 label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
-              >
-                {linkText}
-                <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
-
+          <div className="font-body font-light" style={{ fontSize: FONT, lineHeight: 1.45 }}>
+            {reduce
+              ? paragraphs.map((p, i) => (
+                  <p key={i} className={i > 0 ? 'mt-8' : ''} style={{ color: '#CE8400' }}>
+                    {p}
+                  </p>
+                ))
+              : paragraphs.map((para, pi) => {
+                  const words = para.split(/\s+/);
+                  return (
+                    <p key={pi} className={pi > 0 ? 'mt-8' : ''}>
+                      {words.map((w, wi) => {
+                        const start = wordCursor / totalWords;
+                        const end = (wordCursor + 1) / totalWords;
+                        wordCursor += 1;
+                        return (
+                          <span key={wi}>
+                            <FillWord word={w} progress={scrollYProgress} range={[start, end]} />{' '}
+                          </span>
+                        );
+                      })}
+                    </p>
+                  );
+                })}
           </div>
+
+          <a
+            href={linkHref}
+            className="mt-12 inline-flex items-center gap-2 label-text text-xs text-almond-cream/50 hover:text-nature-brown border-b border-almond-cream/20 hover:border-nature-brown transition-all duration-300 pb-1 w-fit"
+          >
+            {linkText}
+            <ArrowRight className="w-4 h-4" />
+          </a>
         </div>
       </div>
-    </>
+    </section>
   );
 }
