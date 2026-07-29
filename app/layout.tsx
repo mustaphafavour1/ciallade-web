@@ -50,14 +50,17 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 
-  // Only override the file-based favicon when the CMS actually provides an icon.
-  if (favicon || apple) {
-    meta.icons = {
-      icon: favicon || undefined,
-      shortcut: favicon || undefined,
-      apple: apple || undefined,
-    };
-  }
+  // Always emit an explicit icon. The built-in favicon now lives in /public
+  // (not app/) so it no longer auto-injects a competing `sizes="any"` <link>
+  // that overrode the CMS icon. Sanity favicon/logo wins; /favicon.ico is the
+  // last-resort fallback.
+  const iconUrl = favicon || '/favicon.ico';
+  const iconType = iconUrl.includes('.ico') ? 'image/x-icon' : 'image/png';
+  meta.icons = {
+    icon: [{ url: iconUrl, type: iconType }],
+    shortcut: [{ url: iconUrl }],
+    apple: apple ? [{ url: apple }] : [{ url: iconUrl }],
+  };
 
   return meta;
 }
